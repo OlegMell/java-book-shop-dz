@@ -1,0 +1,146 @@
+body {
+    background-color: rgba(0, 0, 0, .1);
+    backdrop-filter: blur(20px) saturate(120%);
+}
+
+.form-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+
+.auth-form-wrapper {
+    display: flex;
+    flex-direction: column;
+}
+
+.form,
+.auth-form {
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    background-color: rgba(0, 0, 0, .3);
+    padding: 15px;
+}
+
+.authors-form-box {
+    display: flex;
+    justify-content: space-between;
+    width: 600px;
+    margin: 0 auto;
+}
+
+.add-author-box {
+    display: flex;
+    justify-content: space-between;
+    width: 350px;
+}
+
+.authors-fields-group {
+    border: 1px solid rgba(0, 0, 0, .8);
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 10px;
+}
+
+.header {
+    position: sticky;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 9999;
+    backdrop-filter: blur(20px) saturate(180%);
+    background-color: rgba(255, 255, 255, .75) !important;
+}
+
+.navbar-box {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.navbar-box .navbar-part {
+    width: 50%;
+    display: flex;
+}
+
+.navbar-box .navbar-part:last-of-type {
+    justify-content: flex-end;
+}
+
+.nav-item {
+    margin-right: 10px;
+}
+
+.navbar-box h1 {
+    width: 30%;
+}
+
+.filter-box {
+    width: 25%;
+    background-color: rgba(0, 0, 0, .15);
+    padding-top: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.form-select,
+#priceFilter {
+    width: 200px;
+}
+
+.filter-box #filterForm {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 15px;
+    align-items: center;
+    flex-direction: column;
+    width: 20%;
+}
+
+.price-box {
+    width: min-content;
+}
+
+.books-wrapper {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    width: 80%;
+}
+
+.wrap {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+}
+
+.slide-top {
+    -webkit-animation: slide-top 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
+    animation: slide-top 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
+}
+
+@-webkit-keyframes slide-top {
+    0% {
+        -webkit-transform: translateY(30px);
+        transform: translateY(30px);
+    }
+    100% {
+        -webkit-transform: translateY(-10px);
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes slide-top {
+    0% {
+        -webkit-transform: translateY(30px);
+        transform: translateY(30px);
+    }
+    100% {
+        -webkit-transform: translateY(-10px);
+        transform: translateY(-10px);
+    }
+}
