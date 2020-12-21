@@ -69,6 +69,4 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .passwordEncoder(getPasswordEncoder());
 
     }
-
-
 }

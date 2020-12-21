@@ -15,6 +15,9 @@ public class UserValidationDto {
     @NotBlank(message = "Confirm password is required field!")
     private String confirmPassword;
 
+    @NotBlank(message = "Email is required field!")
+    private String email;
+
     public UserValidationDto(@NotBlank(message = "Username is required field!") String username,
                              @NotBlank(message = "Password is required field!") String password,
                              @NotBlank(message = "Confirm password is required field!") String confirmPassword) {
@@ -53,5 +56,13 @@ public class UserValidationDto {
 
     public void setConfirmPassword(String confirmPassword) {
         this.confirmPassword = confirmPassword;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 }

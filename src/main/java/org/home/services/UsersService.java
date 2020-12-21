@@ -1,6 +1,9 @@
 package org.home.services;
 
+import org.home.dto.UserValidationDto;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.StringUtils;
 import org.home.entities.Role;
 import org.home.entities.User;
@@ -18,13 +21,18 @@ import java.util.UUID;
 public class UsersService implements UserDetailsService {
     private final UsersRepository usersRepos;
     private final MailSenderService mailSenderService;
+    private final PasswordEncoder passEncoder;
 
     @Value("${current.host}")
     private String currentHost;
 
-    public UsersService(UsersRepository usersRepos, MailSenderService mailSenderService) {
+    public UsersService(UsersRepository usersRepos,
+                        MailSenderService mailSenderService,
+                        @Lazy PasswordEncoder passEncoder
+    ) {
         this.usersRepos = usersRepos;
         this.mailSenderService = mailSenderService;
+        this.passEncoder = passEncoder;
     }
 
     @Override
@@ -36,28 +44,28 @@ public class UsersService implements UserDetailsService {
         return this.usersRepos.findUserByActivateCode(code);
     }
 
-    public boolean addNewUser(User user) {
-        var srchUser = this.loadUserByUsername(user.getUsername());
-        if (srchUser == null) {
-            user.setActivateCode(UUID.randomUUID().toString());
-            user.setActive(true);
-            user.setRoles(Collections.singleton(Role.USER));
-            usersRepos.save(user);
+    public void addNewUser(UserValidationDto userValidDto) {
+        User user = new User();
 
-            if (!StringUtils.isEmpty(user.getEmail())) {
-                String message = String
-                        .format("%s, Welcome to Book Shop! Please click to this link for active your account! %s/auth/activate/%s",
-                                user.getUsername(),
-                                currentHost,
-                                user.getActivateCode());
+        user.setUsername(userValidDto.getUsername());
+        user.setPassword(passEncoder.encode(userValidDto.getPassword()));
+        user.setEmail(userValidDto.getEmail());
 
-                mailSenderService.send(user.getEmail(), "Book Shop Activation Account", message);
-            }
+        user.setActivateCode(UUID.randomUUID().toString());
+        user.setActive(true);
+        user.setRoles(Collections.singleton(Role.USER));
 
-            return true;
+        usersRepos.save(user);
+
+        if (!StringUtils.isEmpty(user.getEmail())) {
+            String message = String
+                    .format("%s, Welcome to Book Shop! Please click to this link for active your account! %s/auth/activate/%s",
+                            user.getUsername(),
+                            currentHost,
+                            user.getActivateCode());
+
+            mailSenderService.send(user.getEmail(), "Book Shop Activation Account", message);
         }
-
-        return false;
     }
 
     public boolean activateUser(String code) {
@@ -65,7 +73,6 @@ public class UsersService implements UserDetailsService {
 
         if (user == null) return false;
 
-        user.setActivateCode(null);
         user.setActivateCode(null);
         usersRepos.save(user);
 
