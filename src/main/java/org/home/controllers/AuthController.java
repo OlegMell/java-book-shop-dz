@@ -5,6 +5,7 @@ import org.home.entities.Role;
 import org.home.entities.User;
 import org.home.repositories.UsersRepository;
 import org.home.services.UsersService;
+import org.home.services.ValidationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -24,13 +25,14 @@ import java.util.stream.Collectors;
 @RequestMapping("/auth")
 public class AuthController {
 
-    private final UsersRepository userRepo;
-
     private final UsersService usersService;
+    private final ValidationService validationService;
 
-    public AuthController(UsersRepository userRepo, UsersService usersService) {
-        this.userRepo = userRepo;
+    public AuthController(UsersService usersService,
+                          ValidationService validationService
+    ) {
         this.usersService = usersService;
+        this.validationService = validationService;
     }
 
     @GetMapping("/login")
@@ -50,19 +52,15 @@ public class AuthController {
     ) {
 
         if (result.hasErrors()) {
-            Map<String, String> errors = result.getFieldErrors()
-                    .stream()
-                    .collect(Collectors
-                            .toMap(fieldError ->
-                                    fieldError.getField() + "Error", FieldError::getDefaultMessage));
-
+            Map<String, String> errors = this.validationService.getErrors(result);
             model.mergeAttributes(errors);
             model.addAttribute("login", userValidDto.getUsername());
 
             return "auth/registration";
         }
 
-        User findUser = userRepo.findUserByUsername(userValidDto.getUsername());
+        User findUser = this.usersService.getUserByUsername(userValidDto.getUsername());
+
         if (findUser != null) {
             model.addAttribute("message", "User with this username is exists! Please login");
             return "auth/registration";

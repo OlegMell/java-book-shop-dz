@@ -7,16 +7,32 @@
         <div class="form-group">
             <label for="title">Title</label>
             <input type="text" name="title" class="form-control" id="title"
-                    value="${book.title}"
+                   value="${book.title}"
                    placeholder="Title..">
+            <#if titleError??>
+                <div class="validation-error">
+                    ${titleError}
+                </div>
+            </#if>
         </div>
         <div class="form-group">
             <label for="genre">Genre</label>
-            <input type="text" name="genre" class="form-control" id="genre" value="${book.genre.name}" placeholder="Genre..">
+            <input type="text" name="genre" class="form-control" id="genre" value="${book.genre.name}"
+                   placeholder="Genre..">
+            <#if genreError??>
+                <div class="validation-error">
+                    ${genreError}
+                </div>
+            </#if>
         </div>
         <div class="form-group">
             <label for="price">Price</label>
             <input type="text" name="price" class="form-control" id="price" value="${book.price}" placeholder="Price..">
+            <#if priceError??>
+                <div class="validation-error">
+                    ${priceError}
+                </div>
+            </#if>
         </div>
         <div class="form-group">
             <label for="date">Date</label>
@@ -55,5 +71,4 @@
         </div>
         <button type="submit" class="btn btn-primary">Submit</button>
     </form>
-
 </#macro>

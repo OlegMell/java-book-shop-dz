@@ -40,6 +40,10 @@ public class UsersService implements UserDetailsService {
         return usersRepos.findUserByUsername(s);
     }
 
+    public User getUserByUsername(String username) {
+        return this.usersRepos.findUserByUsername(username);
+    }
+
     public User findByActivationCode(String code) {
         return this.usersRepos.findUserByActivateCode(code);
     }
@@ -77,5 +81,9 @@ public class UsersService implements UserDetailsService {
         usersRepos.save(user);
 
         return true;
+    }
+
+    public User getUserById(Long id) {
+        return this.usersRepos.findById(id).orElse(null);
     }
 }

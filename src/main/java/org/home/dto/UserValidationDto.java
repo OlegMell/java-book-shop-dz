@@ -1,5 +1,7 @@
 package org.home.dto;
 
+import org.hibernate.validator.constraints.Length;
+
 import javax.validation.constraints.NotBlank;
 import java.beans.Transient;
 
@@ -10,9 +12,11 @@ public class UserValidationDto {
     private String username;
 
     @NotBlank(message = "Password is required field!")
+    @Length(min = 4, max = 8)
     private String password;
 
     @NotBlank(message = "Confirm password is required field!")
+    @Length(min = 4, max = 8)
     private String confirmPassword;
 
     @NotBlank(message = "Email is required field!")

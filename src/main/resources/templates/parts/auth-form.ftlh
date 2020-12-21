@@ -16,7 +16,7 @@
             <input id="exampleInputUsername1" type="text" class="form-control"
                    name="username" placeholder="Username..." value="<#if login??>${login}</#if>">
             <#if usernameError??>
-                <span>${usernameError}</span>
+                <div class="validation-error">${usernameError}</div>
             </#if>
         </div>
         <div class="form-group">
@@ -24,7 +24,9 @@
             <input type="password" class="form-control" name="password" placeholder="Password..."
                    id="exampleInputPassword1">
             <#if passwordError??>
-                <span>${passwordError}</span>
+                <div class="validation-error">
+                    ${passwordError}
+                </div>
             </#if>
         </div>
         <#if isRegistration>
@@ -33,7 +35,9 @@
                 <input type="password" class="form-control" name="confirmPassword" placeholder="Confirm password..."
                        id="exampleInputPassword2">
                 <#if confirmPasswordError??>
-                    <span>${confirmPasswordError}</span>
+                    <div class="validation-error">
+                        ${confirmPasswordError}
+                    </div>
                 </#if>
             </div>
         </#if>
@@ -45,7 +49,9 @@
                 <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone
                     else.</small>
                 <#if emailError??>
-                    <span>${emailError}</span>
+                    <div class="validation-error">
+                        ${emailError}
+                    </div>
                 </#if>
             </div>
         </#if>
