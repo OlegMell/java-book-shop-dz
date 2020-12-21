@@ -15,6 +15,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -85,5 +86,21 @@ public class UsersService implements UserDetailsService {
 
     public User getUserById(Long id) {
         return this.usersRepos.findById(id).orElse(null);
+    }
+
+    public List<User> getAllUsers() {
+        return (List<User>) this.usersRepos.findAll();
+    }
+
+    public boolean blockUser(Long id, boolean block) {
+        User user = this.usersRepos.findById(id).orElse(null);
+
+        if (user != null) {
+            user.setBlocked(block);
+            this.usersRepos.save(user);
+            return true;
+        }
+
+        return false;
     }
 }

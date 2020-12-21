@@ -13,11 +13,13 @@
         <#else>
             <@h.header/>
             <div class="wrap">
-
                 <#if books ?? >
                     <@f.filter authors genres/>
                 </#if>
                 <div class="books-wrapper">
+                    <#if !books??>
+                        <h2>We haven't books for you now((<br>But you can add your books!!!</h2>
+                    </#if>
                     <@b.booksView books/>
                 </div>
             </div>

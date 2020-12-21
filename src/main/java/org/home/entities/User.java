@@ -4,6 +4,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.util.*;
 
 @Entity
@@ -18,6 +19,8 @@ public class User implements UserDetails {
     private boolean active;
     private String activateCode;
     private String email;
+    private boolean isBlocked;
+    private LocalDate unblockDate;
 
     @ElementCollection(targetClass = Role.class, fetch = FetchType.EAGER)
     @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
@@ -115,5 +118,21 @@ public class User implements UserDetails {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public boolean isBlocked() {
+        return isBlocked;
+    }
+
+    public void setBlocked(boolean isBlocked) {
+        this.isBlocked = isBlocked;
+    }
+
+    public LocalDate getUnblockDate() {
+        return unblockDate;
+    }
+
+    public void setUnblockDate(LocalDate unblockDate) {
+        this.unblockDate = unblockDate;
     }
 }
