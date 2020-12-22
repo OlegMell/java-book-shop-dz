@@ -22,7 +22,10 @@ $(document).ready(() => {
         const parent = $(this).parent().parent().parent();
         const id = $(parent).data("user-id");
         const isBlocked = $(this).is(':checked');
-        const res = await fetch(`${API_URL}users/block-user?id=${id}&blocked=${isBlocked}`);
+        const res = await fetch(`${API_URL}users/block-user`, {
+            method: "POST",
+            body: id
+        });
         const result = await res.text();
 
         if (result === 'ok') {

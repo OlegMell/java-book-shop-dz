@@ -22,4 +22,12 @@ public class UsersApiController {
 
         return "error";
     }
+
+    @PostMapping("/block-user")
+    public Object blockUser(@RequestBody() Long id) {
+        int a = 0;
+
+        return "ok";
+    }
+
 }
