@@ -8,13 +8,28 @@ $(document).ready(() => {
         e.preventDefault();
         const formData = $(this).serialize();
 
-        const response = await fetch(`${API_URL}/filter?${formData}`);
+        const response = await fetch(`${API_URL}books/filter?${formData}`);
         const filteredBooks = await response.json();
 
         const readyBooks = [];
         filteredBooks.forEach(book =>
-            readyBooks.push(createBookCard({ ...book })));
+            readyBooks.push(createBookCard({...book})));
 
         $(".books-wrapper").empty().append(readyBooks);
     });
+
+    $("#blockInp").click(async function () {
+        const parent = $(this).parent().parent().parent();
+        const id = $(parent).data("user-id");
+        const isBlocked = $(this).is(':checked');
+        const res = await fetch(`${API_URL}users/block-user`, {
+            method: "POST",
+            body: id
+        });
+        const result = await res.text();
+
+        if (result === 'ok') {
+            $("#blockDate").prop('disabled', !isBlocked);
+        }
+    })
 });

@@ -10,13 +10,25 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav navbar-box">
                     <div class="navbar-part">
-                        <li class="nav-item active ">
+                        <#if auth.userRole??>
+                            <#list auth.userRole as role>
+                                <#if role == "ADMIN">
+                                    <li class="nav-item active">
+                                        <a class="nav-link" href="/users/">Users<span
+                                                    class="sr-only">(current)</span></a>
+                                    </li>
+                                </#if>
+                            </#list>
+                        </#if>
+
+
+                        <li class="nav-item">
                             <#if auth.user??>
                                 <a class="nav-link" href="/books/your-books/${auth.userId}">My
                                     Books<span class="sr-only">(current)</span></a>
                             </#if>
                         </li>
-                        <li class="nav-item active">
+                        <li class="nav-item">
                             <a class="nav-link" href="/books/add-book">Add Book <span
                                         class="sr-only">(current)</span></a>
                         </li>

@@ -4,6 +4,7 @@ import org.apache.tomcat.jni.Local;
 import org.home.dto.AddBookDto;
 import org.home.dto.AuthorDto;
 import org.home.dto.BookDto;
+import org.home.dto.BookValidationDto;
 import org.home.entities.Author;
 import org.home.entities.Book;
 import org.home.entities.Genre;
@@ -12,15 +13,19 @@ import org.home.repositories.AuthorsRepository;
 import org.home.repositories.BooksRepository;
 import org.home.repositories.GenreRepository;
 import org.home.repositories.UsersRepository;
-import org.home.services.BooksService;
+import org.home.services.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
+import javax.naming.Binding;
+import javax.validation.Valid;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -33,29 +38,30 @@ import java.util.stream.IntStream;
 @Controller()
 @RequestMapping({"/", "/books"})
 public class BookController {
-    private final BooksRepository booksRepos;
-    private final AuthorsRepository authorsRepos;
-    private final UsersRepository usersRepos;
-    private final GenreRepository genresRepos;
+    private final UsersService usersService;
+    private final GenreService genreService;
     private final BooksService booksService;
+    private final ValidationService validationService;
+    private final AuthorService authorService;
 
-    public BookController(BooksRepository booksRepos,
-                          AuthorsRepository authorsRepos,
-                          UsersRepository usersRepos,
-                          GenreRepository genresRepos, BooksService booksService) {
-        this.booksRepos = booksRepos;
-        this.authorsRepos = authorsRepos;
-        this.usersRepos = usersRepos;
-        this.genresRepos = genresRepos;
+    public BookController(UsersService usersService,
+                          GenreService genreService,
+                          BooksService booksService,
+                          ValidationService validationService,
+                          AuthorService authorService) {
+        this.usersService = usersService;
+        this.genreService = genreService;
         this.booksService = booksService;
+        this.validationService = validationService;
+        this.authorService = authorService;
     }
 
 
     @GetMapping("/")
     public String getBooks(@AuthenticationPrincipal User user, Model model) {
-        model.addAttribute("books", booksRepos.findAll());
-        model.addAttribute("genres", genresRepos.findAll());
-        model.addAttribute("authors", authorsRepos.findAll());
+        model.addAttribute("books", this.booksService.getAllBooks());
+        model.addAttribute("genres", this.genreService.getAllGenres());
+        model.addAttribute("authors", this.authorService.getAllAuthors());
 
         if (user != null) {
             model.addAttribute("isActive", user.getActivateCode() == null);
@@ -68,121 +74,86 @@ public class BookController {
 
     @GetMapping("/add-book")
     public String addBook(Model model) {
-        model.addAttribute("authors", authorsRepos.findAll());
+        model.addAttribute("authors", this.authorService.getAllAuthors());
         return "books/add-book";
     }
 
     @PostMapping("/add-book")
-    public String addBook(String title,
-                          String genre,
-                          String price,
+    public String addBook(@Valid BookValidationDto bookValidDto,
+                          BindingResult result,
+                          Model model,
                           @RequestParam("id") User user,
-                          @RequestParam(value = "authors", required = false) List<Long> authors,
-                          @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
                           @RequestParam(value = "firstname", required = false) List<String> firstnames,
                           @RequestParam(value = "lastname", required = false) List<String> lastnames
     ) {
 
-        Genre _findGenre = genresRepos.findByName(genre);
+        if (result.hasErrors()) {
+            Map<String, String> errors = this.validationService.getErrors(result);
+            model.mergeAttributes(errors);
+            model.addAttribute("authors", this.authorService.getAllAuthors());
 
-        if (_findGenre == null)
-            _findGenre = genresRepos.save(new Genre(genre));
-
-
-        List<Author> _authors = new ArrayList<>();
-        if (authors == null) {
-            var authorsMap = zipToMap(firstnames, lastnames);
-
-            for (Map.Entry<String, String> pair :
-                    authorsMap.entrySet()) {
-                Author author = authorsRepos.save(new Author(pair.getKey(), pair.getValue()));
-                _authors.add(author);
-            }
-        } else {
-            authors.forEach(author -> {
-                authorsRepos.findById(author).ifPresent(_authors::add);
-            });
-
+            return "books/add-book";
         }
 
-        booksService.setBookFields(null, title, price, _findGenre, _authors, date, user);
+        this.booksService.addNewBook(bookValidDto, firstnames, lastnames, user);
 
         return "redirect:/";
     }
 
 
     @GetMapping("/your-books/{id}")
-    public String yourBook( @PathVariable Long id, Model model) {
-        User user = usersRepos.findById(id).orElse(null);
+    public String yourBook(@PathVariable Long id, Model model) {
+        User user = this.usersService.getUserById(id);
+
         if (user != null) {
             List<Book> books = user.getBooks();
             model.addAttribute("books", books);
         } else {
             model.addAttribute("warning", "You haven't added any books yet");
         }
+
         return "books/your-books";
     }
 
     @GetMapping("/edit-book/{id}")
     public String editBook(@PathVariable("id") Long id, Model model) {
-        Book book = booksRepos.findById(id).orElse(null);
+        Book book = this.booksService.getBookById(id);
         model.addAttribute("book", book);
-        model.addAttribute("authors", authorsRepos.findAll());
+        model.addAttribute("authors", this.authorService.getAllAuthors());
 
         return "/books/edit-book";
     }
 
     @PostMapping("/edit-book")
-    public String editBook(String title,
-                           String genre,
-                           String price,
-                           String bookId,
+    public String editBook(@Valid BookValidationDto bookValidDto,
                            @RequestParam("id") User user,
-                           @RequestParam(value = "authors", required = false) List<Long> authors,
-                           @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
-                           @RequestParam(value = "firstname", required = false) List<String> firstnames,
-                           @RequestParam(value = "lastname", required = false) List<String> lastnames
+                           @RequestParam(value = "firstname", required = false)
+                                   List<String> firstnames,
+                           @RequestParam(value = "lastname", required = false)
+                                   List<String> lastnames,
+                           BindingResult result,
+                           Model model
     ) {
 
-        Book book = booksRepos.findById(Long.parseLong(bookId)).orElse(null);
-        Genre _findGenre = genresRepos.findByName(genre);
+        if (result.hasErrors()) {
+            Map<String, String> errors = this.validationService.getErrors(result);
+            model.mergeAttributes(errors);
+            Book book = this.booksService.getBookById(bookValidDto.getId());
+            model.addAttribute("book", book);
+            model.addAttribute("authors", this.authorService.getAllAuthors());
 
-        if (_findGenre == null)
-            _findGenre = genresRepos.save(new Genre(genre));
-
-
-        List<Author> _authors = new ArrayList<>();
-        if (authors == null) {
-            var authorsMap = zipToMap(firstnames, lastnames);
-
-            for (Map.Entry<String, String> pair :
-                    authorsMap.entrySet()) {
-                Author author = authorsRepos.save(new Author(pair.getKey(), pair.getValue()));
-                _authors.add(author);
-            }
-
-        } else {
-            authors.forEach(author -> {
-                authorsRepos.findById(author).ifPresent(_authors::add);
-            });
-
+            return "books/edit-book";
         }
 
-        booksService.setBookFields(book, title, price, _findGenre, _authors, date, user);
+        this.booksService.editBook(bookValidDto, firstnames, lastnames, user);
 
         return "redirect:/";
     }
 
     @GetMapping("/remove-book/{id}")
     public String removeBook(@PathVariable("id") Long id) {
-        booksRepos.deleteById(id);
+        this.booksService.removeBook(id);
 
         return "redirect:/";
-    }
-
-
-    private <K, V> Map<K, V> zipToMap(List<K> keys, List<V> values) {
-        return IntStream.range(0, keys.size()).boxed()
-                .collect(Collectors.toMap(keys::get, values::get));
     }
 }

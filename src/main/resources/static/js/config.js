@@ -1,1 +1,1 @@
-const API_URL = "http://localhost:3000/api/books";
+const API_URL = "http://localhost:3000/api/";
