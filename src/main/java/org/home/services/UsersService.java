@@ -1,5 +1,7 @@
 package org.home.services;
 
+import org.home.dto.BlockUserDto;
+import org.home.dto.UserUnblockDateDto;
 import org.home.dto.UserValidationDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
@@ -8,7 +10,6 @@ import org.springframework.util.StringUtils;
 import org.home.entities.Role;
 import org.home.entities.User;
 import org.home.repositories.UsersRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -92,15 +93,26 @@ public class UsersService implements UserDetailsService {
         return (List<User>) this.usersRepos.findAll();
     }
 
-    public boolean blockUser(Long id, boolean block) {
-        User user = this.usersRepos.findById(id).orElse(null);
+    public boolean blockUser(BlockUserDto blockUserDto) {
+        User user = this.usersRepos.findById(blockUserDto.getId()).orElse(null);
 
         if (user != null) {
-            user.setBlocked(block);
+            user.setBlocked(blockUserDto.isBlocked());
             this.usersRepos.save(user);
             return true;
         }
 
         return false;
+    }
+
+    public boolean setUnblockDate(UserUnblockDateDto userUnblockDateDto) {
+        User user= this.usersRepos.findById(userUnblockDateDto.getId()).orElse(null);
+
+        if (user == null) return false;
+
+        user.setUnblockDate(userUnblockDateDto.getDate());
+        this.usersRepos.save(user);
+
+        return true;
     }
 }

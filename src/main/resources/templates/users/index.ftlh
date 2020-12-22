@@ -33,13 +33,14 @@
                 </td>
                 <td>
                     <label>
-                        <input id="blockInp" type="checkbox" <#if user.blocked>checked</#if> >
+                        <input class="block-inp" type="checkbox" <#if user.blocked>checked</#if> >
                     </label>
                 </td>
                 <td>
                     <label>
-                        <input id="blockDate" <#if !user.blocked>disabled</#if> type="datetime-local">
+                        <input class="block-date" <#if !user.blocked>disabled</#if> type="datetime-local">
                     </label>
+                    <button type="button" class="btn btn-success block-submit-btn">Submit</button>
                 </td>
             </tr>
         </#list>

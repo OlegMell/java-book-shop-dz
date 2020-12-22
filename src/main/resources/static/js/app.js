@@ -18,18 +18,66 @@ $(document).ready(() => {
         $(".books-wrapper").empty().append(readyBooks);
     });
 
-    $("#blockInp").click(async function () {
-        const parent = $(this).parent().parent().parent();
-        const id = $(parent).data("user-id");
+    $(".block-inp").click(async function () {
+        const secondParent = $(this).parent().parent();
+        const id = $(secondParent)
+            .parent()
+            .data("user-id");
         const isBlocked = $(this).is(':checked');
+
         const res = await fetch(`${API_URL}users/block-user`, {
             method: "POST",
-            body: id
+            body: JSON.stringify({
+                id,
+                isBlocked
+            }),
+            headers: {
+                [header]: token,
+                "Content-Type": "application/json"
+            }
+        });
+
+        const result = await res.text();
+
+        if (result !== 'ok') {
+            return;
+        }
+
+        $(secondParent)
+            .next()
+            .find(".block-date")
+            .prop('disabled', !isBlocked);
+    });
+
+
+    $(".block-submit-btn").click(async function () {
+        const secondParent = $(this).parent().parent();
+        const id = $(secondParent)
+            .data("user-id");
+
+        console.log(id);
+
+        const date = new Date($(this)
+            .siblings()
+            .find(".block-date")
+            .val());
+
+        const res = await fetch(`${API_URL}users/set-unblock-date`, {
+            method: "POST",
+            body: JSON.stringify({
+                id,
+                date
+            }),
+            headers: {
+                [header]: token,
+                "Content-Type": "application/json"
+            }
         });
         const result = await res.text();
 
         if (result === 'ok') {
-            $("#blockDate").prop('disabled', !isBlocked);
+            alert("OK");
         }
     })
+
 });

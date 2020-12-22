@@ -5,13 +5,14 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Entity
 @Table(name = "usrs")
 public class User implements UserDetails {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String username;
@@ -20,7 +21,7 @@ public class User implements UserDetails {
     private String activateCode;
     private String email;
     private boolean isBlocked;
-    private LocalDate unblockDate;
+    private LocalDateTime unblockDate;
 
     @ElementCollection(targetClass = Role.class, fetch = FetchType.EAGER)
     @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
@@ -128,11 +129,11 @@ public class User implements UserDetails {
         this.isBlocked = isBlocked;
     }
 
-    public LocalDate getUnblockDate() {
+    public LocalDateTime getUnblockDate() {
         return unblockDate;
     }
 
-    public void setUnblockDate(LocalDate unblockDate) {
+    public void setUnblockDate(LocalDateTime unblockDate) {
         this.unblockDate = unblockDate;
     }
 }
