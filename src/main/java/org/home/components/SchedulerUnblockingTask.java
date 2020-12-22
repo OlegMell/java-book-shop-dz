@@ -14,8 +14,8 @@ public class SchedulerUnblockingTask {
         this.unblockingService = unblockingService;
     }
 
-    @Scheduled(fixedRate = 1000)
+    @Scheduled(fixedRate = rate)
     public void unblockUsers() {
-        //...
+        unblockingService.unblockUsers();
     }
 }

@@ -106,7 +106,7 @@ public class UsersService implements UserDetailsService {
     }
 
     public boolean setUnblockDate(UserUnblockDateDto userUnblockDateDto) {
-        User user= this.usersRepos.findById(userUnblockDateDto.getId()).orElse(null);
+        User user = this.usersRepos.findById(userUnblockDateDto.getId()).orElse(null);
 
         if (user == null) return false;
 
@@ -114,5 +114,14 @@ public class UsersService implements UserDetailsService {
         this.usersRepos.save(user);
 
         return true;
+    }
+
+    public void unblockUsers() {
+        List<User> users = this.usersRepos.getUsersByUnblockDate();
+        users.forEach(user -> {
+            user.setBlocked(false);
+            user.setUnblockDate(null);
+            this.usersRepos.save(user);
+        });
     }
 }

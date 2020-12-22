@@ -38,7 +38,8 @@
                 </td>
                 <td>
                     <label>
-                        <input class="block-date" <#if !user.blocked>disabled</#if> type="datetime-local">
+                        <input class="block-date" min="${now}" value="<#if user.blocked>${user.unblockDate}</#if>"
+                               <#if !user.blocked>disabled</#if> type="date">
                     </label>
                     <button type="button" class="btn btn-success block-submit-btn">Submit</button>
                 </td>

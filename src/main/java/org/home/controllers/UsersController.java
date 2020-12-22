@@ -7,6 +7,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import java.time.LocalDateTime;
+
 @Controller
 @RequestMapping({"/users"})
 public class UsersController {
@@ -19,6 +21,7 @@ public class UsersController {
     @GetMapping("/")
     public String users(Model model) {
         model.addAttribute("users", this.usersService.getAllUsers());
+        model.addAttribute("now", LocalDateTime.now());
 
         return "/users/index";
     }

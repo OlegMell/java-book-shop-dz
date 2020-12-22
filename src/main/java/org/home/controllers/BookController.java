@@ -65,6 +65,7 @@ public class BookController {
 
         if (user != null) {
             model.addAttribute("isActive", user.getActivateCode() == null);
+            model.addAttribute("isBlocked", user.isBlocked());
         } else {
             model.addAttribute("isActive", true);
         }

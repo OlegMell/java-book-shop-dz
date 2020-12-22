@@ -10,6 +10,11 @@
                 You need activate your account!<br>
                 Message with activation link already send to your email!
             </div>
+        <#elseif isBlocked?? && isBlocked>
+            <h2>Book Shop</h2>
+            <div class="alert alert-error" role="alert">
+                Your account was blocked by admin!
+            </div>
         <#else>
             <@h.header/>
             <div class="wrap">

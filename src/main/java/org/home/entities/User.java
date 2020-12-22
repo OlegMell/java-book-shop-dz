@@ -21,7 +21,7 @@ public class User implements UserDetails {
     private String activateCode;
     private String email;
     private boolean isBlocked;
-    private LocalDateTime unblockDate;
+    private LocalDate unblockDate;
 
     @ElementCollection(targetClass = Role.class, fetch = FetchType.EAGER)
     @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
@@ -129,11 +129,11 @@ public class User implements UserDetails {
         this.isBlocked = isBlocked;
     }
 
-    public LocalDateTime getUnblockDate() {
+    public LocalDate getUnblockDate() {
         return unblockDate;
     }
 
-    public void setUnblockDate(LocalDateTime unblockDate) {
+    public void setUnblockDate(LocalDate unblockDate) {
         this.unblockDate = unblockDate;
     }
 }
