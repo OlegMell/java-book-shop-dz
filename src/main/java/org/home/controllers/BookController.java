@@ -32,6 +32,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -86,7 +88,7 @@ public class BookController {
                           @RequestParam("id") User user,
                           @RequestParam(value = "firstname", required = false) List<String> firstnames,
                           @RequestParam(value = "lastname", required = false) List<String> lastnames
-    ) {
+    ) throws ExecutionException, InterruptedException {
 
         if (result.hasErrors()) {
             Map<String, String> errors = this.validationService.getErrors(result);
@@ -96,15 +98,20 @@ public class BookController {
             return "books/add-book";
         }
 
-        this.booksService.addNewBook(bookValidDto, firstnames, lastnames, user);
-
+        CompletableFuture<Object> objectCompletableFuture = this.booksService.addNewBook(bookValidDto, firstnames, lastnames, user);
+        CompletableFuture.allOf(objectCompletableFuture).join();
+        objectCompletableFuture.get();
         return "redirect:/";
     }
 
 
     @GetMapping("/your-books/{id}")
-    public String yourBook(@PathVariable Long id, Model model) {
-        User user = this.usersService.getUserById(id);
+    public String yourBook(@PathVariable Long id, Model model) throws
+            ExecutionException,
+            InterruptedException {
+        CompletableFuture<User> userCompletableFuture = this.usersService.getUserById(id);
+        CompletableFuture.allOf(userCompletableFuture).join();
+        User user = userCompletableFuture.get();
 
         if (user != null) {
             List<Book> books = user.getBooks();
@@ -117,8 +124,10 @@ public class BookController {
     }
 
     @GetMapping("/edit-book/{id}")
-    public String editBook(@PathVariable("id") Long id, Model model) {
-        Book book = this.booksService.getBookById(id);
+    public String editBook(@PathVariable("id") Long id, Model model) throws ExecutionException, InterruptedException {
+        CompletableFuture<Book> bookCompletableFuture = this.booksService.getBookById(id);
+        CompletableFuture.allOf(bookCompletableFuture).join();
+        Book book = bookCompletableFuture.get();
         model.addAttribute("book", book);
         model.addAttribute("authors", this.authorService.getAllAuthors());
 
@@ -134,12 +143,14 @@ public class BookController {
                                    List<String> lastnames,
                            BindingResult result,
                            Model model
-    ) {
+    ) throws ExecutionException, InterruptedException {
 
         if (result.hasErrors()) {
             Map<String, String> errors = this.validationService.getErrors(result);
             model.mergeAttributes(errors);
-            Book book = this.booksService.getBookById(bookValidDto.getId());
+            CompletableFuture<Book> bookCompletableFuture = this.booksService.getBookById(bookValidDto.getId());
+            CompletableFuture.allOf(bookCompletableFuture).join();
+            Book book = bookCompletableFuture.get();
             model.addAttribute("book", book);
             model.addAttribute("authors", this.authorService.getAllAuthors());
 

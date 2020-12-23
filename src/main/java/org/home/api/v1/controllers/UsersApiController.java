@@ -4,6 +4,9 @@ import org.home.dto.UserUnblockDateDto;
 import org.home.services.UsersService;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+
 @RestController
 @RequestMapping("/api/users")
 public class UsersApiController {
@@ -14,8 +17,11 @@ public class UsersApiController {
     }
 
     @PostMapping("/set-unblock-date")
-    public Object setBlockDate(@RequestBody UserUnblockDateDto userUnblockDateDto) {
-        if (this.usersService.setUnblockDate(userUnblockDateDto)) {
+    public Object setBlockDate(@RequestBody UserUnblockDateDto userUnblockDateDto) throws ExecutionException, InterruptedException {
+        CompletableFuture<Boolean> future = this.usersService.setUnblockDate(userUnblockDateDto);
+        CompletableFuture.allOf(future).join();
+
+        if (future.get()) {
             return "ok";
         }
 

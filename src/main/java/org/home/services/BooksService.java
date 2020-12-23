@@ -45,7 +45,7 @@ public class BooksService {
                                                 List<String> firstnames,
                                                 List<String> lastnames,
                                                 User user
-    ) {
+    ) throws ExecutionException, InterruptedException {
         Genre _findGenre = this.getBookGenre(bookValidDto.getGenre());
 
         if (_findGenre == null)
@@ -79,7 +79,7 @@ public class BooksService {
                                               List<String> firstnames,
                                               List<String> lastnames,
                                               User user
-    ) {
+    ) throws ExecutionException, InterruptedException {
         Book book = booksRepos.findById(bookValidDto.getId()).orElse(null);
         Genre _findGenre = this.getBookGenre(bookValidDto.getGenre());
 
@@ -113,8 +113,10 @@ public class BooksService {
     }
 
 
-    private Genre getBookGenre(String genre) {
-        return this.genreService.findGenreByName(genre);
+    private Genre getBookGenre(String genre) throws ExecutionException, InterruptedException {
+        CompletableFuture<Genre> compFutureGenre = this.genreService.findGenreByName(genre);
+        CompletableFuture.allOf(compFutureGenre).join();
+        return compFutureGenre.get();
     }
 
     private void setBookFields(Book _book,
