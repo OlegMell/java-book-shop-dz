@@ -9,9 +9,12 @@ public class UserUnblockDateDto {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private LocalDate date;
 
-    public UserUnblockDateDto(long id, LocalDate date) {
+    private boolean isBlocked;
+
+    public UserUnblockDateDto(long id, LocalDate date, boolean isBlocked) {
         this.id = id;
         this.date = date;
+        this.isBlocked = isBlocked;
     }
 
     public long getId() {
@@ -28,5 +31,13 @@ public class UserUnblockDateDto {
 
     public void setDate(LocalDate date) {
         this.date = date;
+    }
+
+    public boolean isBlocked() {
+        return isBlocked;
+    }
+
+    public void setBlocked(boolean blocked) {
+        isBlocked = blocked;
     }
 }

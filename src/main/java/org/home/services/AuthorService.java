@@ -17,6 +17,10 @@ public class AuthorService {
     }
 
     public List<Author> getAllAuthors() {
-        return this.authorsRepos.findAll();
+        var authors = this.authorsRepos.findAll();
+        if (authors.size() == 0) {
+            authors = null;
+        }
+        return authors;
     }
 }

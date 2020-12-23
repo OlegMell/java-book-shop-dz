@@ -20,28 +20,7 @@ $(document).ready(() => {
 
     $(".block-inp").click(async function () {
         const secondParent = $(this).parent().parent();
-        const id = $(secondParent)
-            .parent()
-            .data("user-id");
         const isBlocked = $(this).is(':checked');
-
-        const res = await fetch(`${API_URL}users/block-user`, {
-            method: "POST",
-            body: JSON.stringify({
-                id,
-                isBlocked
-            }),
-            headers: {
-                [header]: token,
-                "Content-Type": "application/json"
-            }
-        });
-
-        const result = await res.text();
-
-        if (result !== 'ok') {
-            return;
-        }
 
         $(secondParent)
             .next()
@@ -55,8 +34,6 @@ $(document).ready(() => {
         const id = $(secondParent)
             .data("user-id");
 
-        console.log(id);
-
         const date = new Date($(this)
             .siblings()
             .find(".block-date")
@@ -66,7 +43,8 @@ $(document).ready(() => {
             method: "POST",
             body: JSON.stringify({
                 id,
-                date
+                date,
+                isBlocked: $(this).parent().prev().children().find(".block-inp").is(':checked')
             }),
             headers: {
                 [header]: token,
@@ -76,8 +54,7 @@ $(document).ready(() => {
         const result = await res.text();
 
         if (result === 'ok') {
-            alert("OK");
+            alert("User  has been blocked!");
         }
     })
-
 });

@@ -139,7 +139,11 @@ public class BooksService {
 
 
     public List<Book> getAllBooks() {
-        return this.booksRepos.findAll();
+        var books = this.booksRepos.findAll();
+        if (books.size() == 0) {
+            books = null;
+        }
+        return books;
     }
 
 

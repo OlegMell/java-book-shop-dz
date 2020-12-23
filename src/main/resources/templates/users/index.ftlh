@@ -3,6 +3,7 @@
 
 <@c.page>
     <@h.header/>
+    <h3 class="p-3">USERS</h3>
     <table class="table">
         <thead>
         <tr>

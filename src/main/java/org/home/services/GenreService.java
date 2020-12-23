@@ -21,6 +21,10 @@ public class GenreService {
     }
 
     public List<Genre> getAllGenres() {
-        return (List<Genre>) this.genreRepos.findAll();
+        var genres = (List<Genre>) this.genreRepos.findAll();
+        if (genres.size() == 0) {
+            genres = null;
+        }
+        return genres;
     }
 }

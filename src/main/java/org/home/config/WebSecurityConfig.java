@@ -33,24 +33,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         this.usersService = usersService;
     }
 
-//    @Bean
-//    CorsConfigurationSource corsConfigurationSource() {
-//        CorsConfiguration configuration = new CorsConfiguration();
-//        configuration.setAllowedOrigins(Arrays.asList("*"));
-//        configuration.setAllowedMethods(Arrays.asList("*"));
-//        configuration.setAllowedHeaders(Arrays.asList("*"));
-//        configuration.setAllowCredentials(true);
-//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-//        source.registerCorsConfiguration("/**", configuration);
-//        return source;
-//    }
-
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        //http.cors().and().csrf().disable();
         http
                 .authorizeRequests()
-                .antMatchers("/", "/auth/registration", "/static/**", "/api/**")
+                .antMatchers("/", "/auth/registration", "/auth/activate/**" ,"/static/**", "/api/**")
                 .permitAll()
                 .anyRequest().authenticated()
                 .and()

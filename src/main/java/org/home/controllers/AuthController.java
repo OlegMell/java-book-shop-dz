@@ -82,6 +82,6 @@ public class AuthController {
             model.addAttribute("message", "Error activate!");
         }
 
-        return "/auth/login";
+        return "/active-account";
     }
 }

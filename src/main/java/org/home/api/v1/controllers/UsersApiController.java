@@ -1,6 +1,5 @@
 package org.home.api.v1.controllers;
 
-import org.home.dto.BlockUserDto;
 import org.home.dto.UserUnblockDateDto;
 import org.home.services.UsersService;
 import org.springframework.web.bind.annotation.*;
@@ -14,15 +13,6 @@ public class UsersApiController {
         this.usersService = usersService;
     }
 
-    @PostMapping("/block-user")
-    public Object blockUser(@RequestBody() BlockUserDto blockUserDto) {
-        if (this.usersService.blockUser(blockUserDto)) {
-            return "ok";
-        }
-
-        return "error";
-    }
-
     @PostMapping("/set-unblock-date")
     public Object setBlockDate(@RequestBody UserUnblockDateDto userUnblockDateDto) {
         if (this.usersService.setUnblockDate(userUnblockDateDto)) {
@@ -31,5 +21,4 @@ public class UsersApiController {
 
         return "error";
     }
-
 }
