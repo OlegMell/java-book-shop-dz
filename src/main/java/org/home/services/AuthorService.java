@@ -4,9 +4,11 @@ import org.home.dto.AuthorDto;
 import org.home.entities.Author;
 import org.home.repositories.AuthorsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class AuthorService {
@@ -16,11 +18,12 @@ public class AuthorService {
         this.authorsRepos = authorsRepos;
     }
 
-    public List<Author> getAllAuthors() {
+    @Async
+    public CompletableFuture<List<Author>> getAllAuthors() {
         var authors = this.authorsRepos.findAll();
         if (authors.size() == 0) {
             authors = null;
         }
-        return authors;
+        return CompletableFuture.completedFuture(authors);
     }
 }

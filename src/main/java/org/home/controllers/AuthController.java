@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import javax.validation.Valid;
 import java.util.Collections;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 @Controller
@@ -49,7 +51,7 @@ public class AuthController {
     public String registration(@Valid UserValidationDto userValidDto,
                                BindingResult result,
                                Model model
-    ) {
+    ) throws ExecutionException, InterruptedException {
 
         if (result.hasErrors()) {
             Map<String, String> errors = this.validationService.getErrors(result);
@@ -59,7 +61,9 @@ public class AuthController {
             return "auth/registration";
         }
 
-        User findUser = this.usersService.getUserByUsername(userValidDto.getUsername());
+        CompletableFuture<User> compFutureUser = this.usersService.getUserByUsername(userValidDto.getUsername());
+        CompletableFuture.allOf(compFutureUser).join();
+        User findUser = compFutureUser.get();
 
         if (findUser != null) {
             model.addAttribute("message", "User with this username is exists! Please login");
@@ -74,9 +78,12 @@ public class AuthController {
     @GetMapping("/activate/{code}")
     public String activate(@PathVariable("code") String code,
                            Model model
-    ) {
+    ) throws ExecutionException, InterruptedException {
 
-        if (this.usersService.activateUser(code)) {
+        CompletableFuture<Boolean> compFutureResult = this.usersService.activateUser(code);
+        CompletableFuture.allOf(compFutureResult).join();
+
+        if (compFutureResult.get()) {
             model.addAttribute("message", "Success activated");
         } else {
             model.addAttribute("message", "Error activate!");

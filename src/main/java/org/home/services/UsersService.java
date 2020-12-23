@@ -1,9 +1,11 @@
 package org.home.services;
 
+import org.hibernate.internal.build.AllowSysOut;
 import org.home.dto.UserUnblockDateDto;
 import org.home.dto.UserValidationDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.StringUtils;
 import org.home.entities.Role;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Service;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class UsersService implements UserDetailsService {
@@ -41,15 +44,18 @@ public class UsersService implements UserDetailsService {
         return usersRepos.findUserByUsername(s);
     }
 
-    public User getUserByUsername(String username) {
-        return this.usersRepos.findUserByUsername(username);
+    @Async
+    public CompletableFuture<User> getUserByUsername(String username) {
+        return CompletableFuture.completedFuture(this.usersRepos.findUserByUsername(username));
     }
 
-    public User findByActivationCode(String code) {
-        return this.usersRepos.findUserByActivateCode(code);
+    @Async
+    public CompletableFuture<User> findByActivationCode(String code) {
+        return CompletableFuture.completedFuture(this.usersRepos.findUserByActivateCode(code));
     }
 
-    public void addNewUser(UserValidationDto userValidDto) {
+    @Async
+    public CompletableFuture<Object> addNewUser(UserValidationDto userValidDto) {
         User user = new User();
 
         user.setUsername(userValidDto.getUsername());
@@ -71,45 +77,54 @@ public class UsersService implements UserDetailsService {
 
             mailSenderService.send(user.getEmail(), "Book Shop Activation Account", message);
         }
+
+        return CompletableFuture.completedFuture(null);
     }
 
-    public boolean activateUser(String code) {
+    @Async
+    public CompletableFuture<Boolean> activateUser(String code) {
         User user = usersRepos.findUserByActivateCode(code);
 
-        if (user == null) return false;
+        if (user == null) return CompletableFuture.completedFuture(Boolean.FALSE);
 
         user.setActivateCode(null);
         usersRepos.save(user);
 
-        return true;
+        return CompletableFuture.completedFuture(Boolean.TRUE);
     }
 
-    public User getUserById(Long id) {
-        return this.usersRepos.findById(id).orElse(null);
+    @Async
+    public CompletableFuture<User> getUserById(Long id) {
+        return CompletableFuture.completedFuture(this.usersRepos.findById(id).orElse(null));
     }
 
-    public List<User> getAllUsers() {
-        return (List<User>) this.usersRepos.findAll();
+    @Async
+    public CompletableFuture<List<User>> getAllUsers() {
+        return CompletableFuture.completedFuture((List<User>) this.usersRepos.findAll());
     }
 
-    public boolean setUnblockDate(UserUnblockDateDto userUnblockDateDto) {
+    @Async
+    public CompletableFuture<Boolean> setUnblockDate(UserUnblockDateDto userUnblockDateDto) {
         User user = this.usersRepos.findById(userUnblockDateDto.getId()).orElse(null);
 
-        if (user == null) return false;
+        if (user == null) return CompletableFuture.completedFuture(Boolean.FALSE);
 
         user.setBlocked(userUnblockDateDto.isBlocked());
         user.setUnblockDate(userUnblockDateDto.getDate());
         this.usersRepos.save(user);
 
-        return true;
+        return CompletableFuture.completedFuture(Boolean.TRUE);
     }
 
-    public void unblockUsers() {
+    @Async
+    public CompletableFuture<Object> unblockUsers() {
         List<User> users = this.usersRepos.getUsersByUnblockDate();
         users.forEach(user -> {
             user.setBlocked(false);
             user.setUnblockDate(null);
             this.usersRepos.save(user);
         });
+
+        return CompletableFuture.completedFuture(null);
     }
 }

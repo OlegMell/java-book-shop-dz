@@ -3,9 +3,11 @@ package org.home.services;
 import org.home.entities.Genre;
 import org.home.repositories.GenreRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class GenreService {
@@ -15,16 +17,17 @@ public class GenreService {
         this.genreRepos = genreRepos;
     }
 
-
-    public Genre findGenreByName(String genreName) {
-        return this.genreRepos.findByName(genreName);
+    @Async
+    public CompletableFuture<Genre> findGenreByName(String genreName) {
+        return CompletableFuture.completedFuture(this.genreRepos.findByName(genreName));
     }
 
-    public List<Genre> getAllGenres() {
+    @Async
+    public CompletableFuture<List<Genre>> getAllGenres() {
         var genres = (List<Genre>) this.genreRepos.findAll();
         if (genres.size() == 0) {
             genres = null;
         }
-        return genres;
+        return CompletableFuture.completedFuture(genres);
     }
 }

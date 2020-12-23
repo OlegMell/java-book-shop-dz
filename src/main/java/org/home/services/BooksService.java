@@ -9,12 +9,15 @@ import org.home.repositories.AuthorsRepository;
 import org.home.repositories.BooksRepository;
 import org.home.repositories.GenreRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -37,10 +40,11 @@ public class BooksService {
         this.genreService = genreService;
     }
 
-    public void addNewBook(BookValidationDto bookValidDto,
-                           List<String> firstnames,
-                           List<String> lastnames,
-                           User user
+    @Async
+    public CompletableFuture<Object> addNewBook(BookValidationDto bookValidDto,
+                                                List<String> firstnames,
+                                                List<String> lastnames,
+                                                User user
     ) {
         Genre _findGenre = this.getBookGenre(bookValidDto.getGenre());
 
@@ -66,12 +70,15 @@ public class BooksService {
                 _findGenre,
                 _authors,
                 user);
+
+        return CompletableFuture.completedFuture(null);
     }
 
-    public void editBook(BookValidationDto bookValidDto,
-                         List<String> firstnames,
-                         List<String> lastnames,
-                         User user
+    @Async
+    public CompletableFuture<Object> editBook(BookValidationDto bookValidDto,
+                                              List<String> firstnames,
+                                              List<String> lastnames,
+                                              User user
     ) {
         Book book = booksRepos.findById(bookValidDto.getId()).orElse(null);
         Genre _findGenre = this.getBookGenre(bookValidDto.getGenre());
@@ -101,17 +108,20 @@ public class BooksService {
                 _findGenre,
                 _authors,
                 user);
+
+        return CompletableFuture.completedFuture(null);
     }
+
 
     private Genre getBookGenre(String genre) {
         return this.genreService.findGenreByName(genre);
     }
 
     private void setBookFields(Book _book,
-                              BookValidationDto bookValidDto,
-                              Genre genre,
-                              List<Author> authors,
-                              User user) {
+                               BookValidationDto bookValidDto,
+                               Genre genre,
+                               List<Author> authors,
+                               User user) {
         if (_book == null) {
             _book = booksRepos.save(new Book(bookValidDto.getTitle(),
                     bookValidDto.getDate(),
@@ -129,21 +139,26 @@ public class BooksService {
         booksRepos.save(_book);
     }
 
-    public void removeBook(Long id) {
+    @Async
+    public CompletableFuture<Object> removeBook(Long id) {
         booksRepos.deleteById(id);
+        return CompletableFuture.completedFuture(null);
     }
 
-    public Book getBookById(Long id) {
-        return this.booksRepos.findById(id).orElse(null);
+    @Async
+    public CompletableFuture<Book> getBookById(Long id) {
+        return CompletableFuture.completedFuture(this.booksRepos.findById(id).orElse(null));
     }
 
-
-    public List<Book> getAllBooks() {
+    @Async
+    public CompletableFuture<List<Book>> getAllBooks() {
         var books = this.booksRepos.findAll();
+
         if (books.size() == 0) {
             books = null;
         }
-        return books;
+
+        return CompletableFuture.completedFuture(books);
     }
 
 
