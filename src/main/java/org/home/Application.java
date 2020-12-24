@@ -11,7 +11,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EntityScan("org.home.entities")
 @EnableJpaRepositories("org.home.repositories")
 @EnableScheduling
-@EnableAsync
+@EnableAsync(proxyTargetClass = true)
 public class Application {
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);

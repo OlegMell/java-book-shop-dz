@@ -15,7 +15,7 @@
                 </a>
                 <h3>Add Book</h3>
             </div>
-            <@abf.addBookForm authors/>
+            <@abf.addBookForm authors!/>
         </div>
     </div>
 </@c.page>

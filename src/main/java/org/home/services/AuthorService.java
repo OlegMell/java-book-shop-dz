@@ -20,7 +20,7 @@ public class AuthorService {
 
     @Async
     public CompletableFuture<List<Author>> getAllAuthors() {
-        var authors = this.authorsRepos.findAll();
+        List<Author> authors = this.authorsRepos.findAll();
         if (authors.size() == 0) {
             authors = null;
         }

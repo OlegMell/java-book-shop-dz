@@ -1,41 +1,22 @@
 package org.home.controllers;
 
-import org.apache.tomcat.jni.Local;
-import org.home.dto.AddBookDto;
-import org.home.dto.AuthorDto;
-import org.home.dto.BookDto;
 import org.home.dto.BookValidationDto;
 import org.home.entities.Author;
 import org.home.entities.Book;
 import org.home.entities.Genre;
 import org.home.entities.User;
-import org.home.repositories.AuthorsRepository;
-import org.home.repositories.BooksRepository;
-import org.home.repositories.GenreRepository;
-import org.home.repositories.UsersRepository;
 import org.home.services.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
-import javax.naming.Binding;
 import javax.validation.Valid;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 @Controller()
 @RequestMapping({"/", "/books"})
@@ -60,10 +41,20 @@ public class BookController {
 
 
     @GetMapping("/")
-    public String getBooks(@AuthenticationPrincipal User user, Model model) {
-        model.addAttribute("books", this.booksService.getAllBooks());
-        model.addAttribute("genres", this.genreService.getAllGenres());
-        model.addAttribute("authors", this.authorService.getAllAuthors());
+    public String getBooks(@AuthenticationPrincipal User user, Model model) throws ExecutionException, InterruptedException {
+        CompletableFuture<List<Book>> bookCompletableFuture = this.booksService.getAllBooks();
+        CompletableFuture<List<Genre>> genreCompletableFuture = this.genreService.getAllGenres();
+        CompletableFuture<List<Author>> authorCompletableFuture = this.authorService.getAllAuthors();
+
+
+        CompletableFuture.allOf(bookCompletableFuture,
+                genreCompletableFuture,
+                authorCompletableFuture).join();
+
+        List<Book> books = bookCompletableFuture.get();
+        model.addAttribute("books", books);
+        model.addAttribute("genres", genreCompletableFuture.get());
+        model.addAttribute("authors", authorCompletableFuture.get());
 
         if (user != null) {
             model.addAttribute("isActive", user.getActivateCode() == null);
@@ -76,8 +67,11 @@ public class BookController {
     }
 
     @GetMapping("/add-book")
-    public String addBook(Model model) {
-        model.addAttribute("authors", this.authorService.getAllAuthors());
+    public String addBook(Model model) throws ExecutionException, InterruptedException {
+        CompletableFuture<List<Author>> listCompletableFuture = this.authorService.getAllAuthors();
+        CompletableFuture.allOf(listCompletableFuture).join();
+        List<Author> authors = listCompletableFuture.get();
+        model.addAttribute("authors", authors);
         return "books/add-book";
     }
 
@@ -93,7 +87,9 @@ public class BookController {
         if (result.hasErrors()) {
             Map<String, String> errors = this.validationService.getErrors(result);
             model.mergeAttributes(errors);
-            model.addAttribute("authors", this.authorService.getAllAuthors());
+            CompletableFuture<List<Author>> authorCompletableFuture = this.authorService.getAllAuthors();
+            CompletableFuture.allOf(authorCompletableFuture).join();
+            model.addAttribute("authors", authorCompletableFuture.get());
 
             return "books/add-book";
         }
@@ -126,10 +122,12 @@ public class BookController {
     @GetMapping("/edit-book/{id}")
     public String editBook(@PathVariable("id") Long id, Model model) throws ExecutionException, InterruptedException {
         CompletableFuture<Book> bookCompletableFuture = this.booksService.getBookById(id);
-        CompletableFuture.allOf(bookCompletableFuture).join();
+        CompletableFuture<List<Author>> listCompletableFuture = this.authorService.getAllAuthors();
+        CompletableFuture.allOf(bookCompletableFuture, listCompletableFuture).join();
         Book book = bookCompletableFuture.get();
+        List<Author> authors = listCompletableFuture.get();
         model.addAttribute("book", book);
-        model.addAttribute("authors", this.authorService.getAllAuthors());
+        model.addAttribute("authors", authors);
 
         return "/books/edit-book";
     }
@@ -149,10 +147,14 @@ public class BookController {
             Map<String, String> errors = this.validationService.getErrors(result);
             model.mergeAttributes(errors);
             CompletableFuture<Book> bookCompletableFuture = this.booksService.getBookById(bookValidDto.getId());
-            CompletableFuture.allOf(bookCompletableFuture).join();
+            CompletableFuture<List<Author>> listCompletableFuture = this.authorService.getAllAuthors();
+            CompletableFuture.allOf(listCompletableFuture, bookCompletableFuture).join();
+
             Book book = bookCompletableFuture.get();
+            List<Author> authors = listCompletableFuture.get();
+
             model.addAttribute("book", book);
-            model.addAttribute("authors", this.authorService.getAllAuthors());
+            model.addAttribute("authors", authors);
 
             return "books/edit-book";
         }
@@ -163,9 +165,10 @@ public class BookController {
     }
 
     @GetMapping("/remove-book/{id}")
-    public String removeBook(@PathVariable("id") Long id) {
-        this.booksService.removeBook(id);
-
+    public String removeBook(@PathVariable("id") Long id) throws ExecutionException, InterruptedException {
+        CompletableFuture<Object> objectCompletableFuture = this.booksService.removeBook(id);
+        CompletableFuture.allOf(objectCompletableFuture).join();
+        objectCompletableFuture.get();
         return "redirect:/";
     }
 }

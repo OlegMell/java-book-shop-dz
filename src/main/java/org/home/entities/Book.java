@@ -32,10 +32,10 @@ public class Book {
     }
 
 
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinTable(name = "books_authors", joinColumns = @JoinColumn(name = "book_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "author_id", referencedColumnName = "id"))
-    private List<Author> authors = new ArrayList<Author>();
+    private List<Author> authors = new ArrayList<>();
 
     @ManyToOne
     @JoinColumn(name = "user_id")

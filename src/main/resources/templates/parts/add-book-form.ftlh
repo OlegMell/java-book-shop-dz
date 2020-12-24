@@ -34,9 +34,11 @@
                 <h5>Choose exists authors</h5>
                 <label>
                     <select name="authors" multiple class="form-control form-control-lg">
-                        <#list authors as author>
-                            <option value="${author.id}"> ${author.firstName} ${author.lastName}</option>
-                        </#list>
+                        <#if authors??>
+                            <#list authors as author>
+                                <option value="${author.id}"> ${author.firstName} ${author.lastName}</option>
+                            </#list>
+                        </#if>
                     </select>
                 </label>
             </div>

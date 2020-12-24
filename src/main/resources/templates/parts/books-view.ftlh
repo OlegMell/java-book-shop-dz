@@ -11,11 +11,9 @@
                 <#if book.price??>
                     <div class="card-title">$ ${book.price}</div>
                 </#if>
-                <p class="card-text">
-                    <#list book.authors as author>
-                <div>${author.firstName} ${author.lastName}</div>
+                <#list book.authors as author>
+                    <div>${author.firstName} ${author.lastName}</div>
                 </#list>
-                </p>
             </div>
             <div>
                 <#if removable>
