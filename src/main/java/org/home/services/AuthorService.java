@@ -1,5 +1,6 @@
 package org.home.services;
 
+import org.aspectj.lang.annotation.AdviceName;
 import org.home.dto.AuthorDto;
 import org.home.entities.Author;
 import org.home.repositories.AuthorsRepository;
@@ -25,5 +26,15 @@ public class AuthorService {
             authors = null;
         }
         return CompletableFuture.completedFuture(authors);
+    }
+
+    @Async
+    public CompletableFuture<Author> addAuthor(Author author) {
+        return CompletableFuture.completedFuture(this.authorsRepos.save(author));
+    }
+
+    @Async
+    public CompletableFuture<Author> getById(Long id) {
+        return CompletableFuture.completedFuture(this.authorsRepos.findById(id).orElse(null));
     }
 }

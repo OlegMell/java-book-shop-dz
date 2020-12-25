@@ -8,6 +8,7 @@ import org.home.entities.User;
 import org.home.repositories.AuthorsRepository;
 import org.home.repositories.BooksRepository;
 import org.home.repositories.GenreRepository;
+import org.home.utils.ZipToMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -24,102 +25,100 @@ import java.util.stream.IntStream;
 @Service
 public class BooksService {
     private final BooksRepository booksRepos;
-    private final GenreRepository genreRepos;
-    private final AuthorsRepository authorsRepos;
-
+    private final AuthorService authorService;
     private final GenreService genreService;
 
-    public BooksService(BooksRepository booksRepos,
-                        GenreRepository genreRepos,
-                        AuthorsRepository authorsRepos,
+    public BooksService(BooksRepository bookRepos,
+                        AuthorService authorService,
                         GenreService genreService
     ) {
-        this.booksRepos = booksRepos;
-        this.genreRepos = genreRepos;
-        this.authorsRepos = authorsRepos;
+        this.booksRepos = bookRepos;
+        this.authorService = authorService;
         this.genreService = genreService;
     }
 
     @Async
-    public CompletableFuture<Object> addNewBook(BookValidationDto bookValidDto,
-                                                List<String> firstnames,
-                                                List<String> lastnames,
-                                                User user
-    ) throws ExecutionException, InterruptedException {
-        Genre _findGenre = this.getBookGenre(bookValidDto.getGenre());
-
-        if (_findGenre == null)
-            _findGenre = this.genreRepos.save(new Genre(bookValidDto.getGenre()));
-
-        List<Author> _authors = new ArrayList<>();
-        if (bookValidDto.getAuthors() == null) {
-            var authorsMap = zipToMap(firstnames, lastnames);
-
-            for (Map.Entry<String, String> pair :
-                    authorsMap.entrySet()) {
-                Author author = authorsRepos.save(new Author(pair.getKey(), pair.getValue()));
-                _authors.add(author);
-            }
-        } else {
-            bookValidDto.getAuthors().forEach(author ->
-                    authorsRepos.findById(author).ifPresent(_authors::add));
-        }
-
-        this.setBookFields(null,
-                bookValidDto,
-                _findGenre,
-                _authors,
-                user);
-
-        return CompletableFuture.completedFuture(null);
-    }
-
-    @Async
-    public CompletableFuture<Object> editBook(BookValidationDto bookValidDto,
+    public CompletableFuture<Book> addNewBook(BookValidationDto bookValidDto,
                                               List<String> firstnames,
                                               List<String> lastnames,
                                               User user
     ) throws ExecutionException, InterruptedException {
-        Book book = booksRepos.findById(bookValidDto.getId()).orElse(null);
-        Genre _findGenre = this.getBookGenre(bookValidDto.getGenre());
+        return CompletableFuture.completedFuture(this.setBook(null,
+                bookValidDto,
+                firstnames,
+                lastnames,
+                user));
+    }
 
-        if (_findGenre == null)
-            _findGenre = this.genreRepos.save(new Genre(bookValidDto.getGenre()));
+    @Async
+    public CompletableFuture<Book> editBook(BookValidationDto bookValidDto,
+                                            List<String> firstnames,
+                                            List<String> lastnames,
+                                            User user
+    ) throws ExecutionException, InterruptedException {
+        Book book = this.booksRepos.findById(bookValidDto.getId()).orElse(null);
 
+        return CompletableFuture.completedFuture(this.setBook(book, bookValidDto, firstnames, lastnames, user));
+    }
+
+    private Book setBook(Book existBook,
+                         BookValidationDto bookValidDto,
+                         List<String> firstnames,
+                         List<String> lastnames,
+                         User user)
+            throws ExecutionException, InterruptedException {
+
+        Genre _findGenre = this.getBookGenre(bookValidDto);
 
         List<Author> _authors = new ArrayList<>();
         if (bookValidDto.getAuthors() == null) {
-            var authorsMap = zipToMap(firstnames, lastnames);
+            var authorsMap = ZipToMap.map(firstnames, lastnames);
 
             for (Map.Entry<String, String> pair :
                     authorsMap.entrySet()) {
-                Author author = authorsRepos.save(new Author(pair.getKey(), pair.getValue()));
-                _authors.add(author);
+                CompletableFuture<Author> author = this.authorService.addAuthor(new Author(pair.getKey(), pair.getValue()));
+                CompletableFuture.allOf(author).join();
+                _authors.add(author.get());
             }
 
         } else {
-            bookValidDto.getAuthors().forEach(author ->
-                    authorsRepos.findById(author).ifPresent(_authors::add));
+            bookValidDto.getAuthors().forEach(author -> {
+                CompletableFuture<Author> authorCompFuture = this.authorService.getById(author);
+                CompletableFuture.allOf(authorCompFuture).join();
 
+                try {
+                    _authors.add(authorCompFuture.get());
+                } catch (InterruptedException | ExecutionException e) {
+                    e.printStackTrace();
+                }
+
+            });
         }
 
-        this.setBookFields(book,
+        return this.setBookFields(existBook,
                 bookValidDto,
                 _findGenre,
                 _authors,
                 user);
-
-        return CompletableFuture.completedFuture(null);
     }
 
-
-    private Genre getBookGenre(String genre) throws ExecutionException, InterruptedException {
-        CompletableFuture<Genre> compFutureGenre = this.genreService.findGenreByName(genre);
+    private Genre getBookGenre(BookValidationDto bookValidDto) throws ExecutionException, InterruptedException {
+        CompletableFuture<Genre> compFutureGenre = this.genreService.findGenreByName(bookValidDto.getGenre());
         CompletableFuture.allOf(compFutureGenre).join();
-        return compFutureGenre.get();
+        Genre _findGenre = compFutureGenre.get();
+
+        CompletableFuture<Genre> compGenreFuture;
+
+        if (_findGenre == null) {
+            compGenreFuture = this.genreService.addGenre(new Genre(bookValidDto.getGenre()));
+            CompletableFuture.allOf(compGenreFuture).join();
+            _findGenre = compFutureGenre.get();
+        }
+
+        return _findGenre;
     }
 
-    private void setBookFields(Book _book,
+    private Book setBookFields(Book _book,
                                BookValidationDto bookValidDto,
                                Genre genre,
                                List<Author> authors,
@@ -138,7 +137,7 @@ public class BooksService {
         _book.getAuthors().addAll(authors);
         _book.setUser(user);
 
-        booksRepos.save(_book);
+        return booksRepos.save(_book);
     }
 
     @Async
@@ -161,11 +160,5 @@ public class BooksService {
         }
 
         return CompletableFuture.completedFuture(books);
-    }
-
-
-    private <K, V> Map<K, V> zipToMap(List<K> keys, List<V> values) {
-        return IntStream.range(0, keys.size()).boxed()
-                .collect(Collectors.toMap(keys::get, values::get));
     }
 }

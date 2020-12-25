@@ -94,7 +94,7 @@ public class BookController {
             return "books/add-book";
         }
 
-        CompletableFuture<Object> objectCompletableFuture = this.booksService.addNewBook(bookValidDto, firstnames, lastnames, user);
+        CompletableFuture<Book> objectCompletableFuture = this.booksService.addNewBook(bookValidDto, firstnames, lastnames, user);
         CompletableFuture.allOf(objectCompletableFuture).join();
         objectCompletableFuture.get();
         return "redirect:/";
@@ -121,13 +121,7 @@ public class BookController {
 
     @GetMapping("/edit-book/{id}")
     public String editBook(@PathVariable("id") Long id, Model model) throws ExecutionException, InterruptedException {
-        CompletableFuture<Book> bookCompletableFuture = this.booksService.getBookById(id);
-        CompletableFuture<List<Author>> listCompletableFuture = this.authorService.getAllAuthors();
-        CompletableFuture.allOf(bookCompletableFuture, listCompletableFuture).join();
-        Book book = bookCompletableFuture.get();
-        List<Author> authors = listCompletableFuture.get();
-        model.addAttribute("book", book);
-        model.addAttribute("authors", authors);
+        this.setBookFormModel(id, model);
 
         return "/books/edit-book";
     }
@@ -146,20 +140,14 @@ public class BookController {
         if (result.hasErrors()) {
             Map<String, String> errors = this.validationService.getErrors(result);
             model.mergeAttributes(errors);
-            CompletableFuture<Book> bookCompletableFuture = this.booksService.getBookById(bookValidDto.getId());
-            CompletableFuture<List<Author>> listCompletableFuture = this.authorService.getAllAuthors();
-            CompletableFuture.allOf(listCompletableFuture, bookCompletableFuture).join();
-
-            Book book = bookCompletableFuture.get();
-            List<Author> authors = listCompletableFuture.get();
-
-            model.addAttribute("book", book);
-            model.addAttribute("authors", authors);
+            this.setBookFormModel(bookValidDto.getId(), model);
 
             return "books/edit-book";
         }
 
-        this.booksService.editBook(bookValidDto, firstnames, lastnames, user);
+        CompletableFuture<Book> bookCompFuture = this.booksService.editBook(bookValidDto, firstnames, lastnames, user);
+        CompletableFuture.allOf(bookCompFuture).join();
+        bookCompFuture.get();
 
         return "redirect:/";
     }
@@ -170,5 +158,18 @@ public class BookController {
         CompletableFuture.allOf(objectCompletableFuture).join();
         objectCompletableFuture.get();
         return "redirect:/";
+    }
+
+
+    private void setBookFormModel(Long bookId, Model model) throws ExecutionException, InterruptedException {
+        CompletableFuture<Book> bookCompletableFuture = this.booksService.getBookById(bookId);
+        CompletableFuture<List<Author>> listCompletableFuture = this.authorService.getAllAuthors();
+        CompletableFuture.allOf(listCompletableFuture, bookCompletableFuture).join();
+
+        Book book = bookCompletableFuture.get();
+        List<Author> authors = listCompletableFuture.get();
+
+        model.addAttribute("book", book);
+        model.addAttribute("authors", authors);
     }
 }

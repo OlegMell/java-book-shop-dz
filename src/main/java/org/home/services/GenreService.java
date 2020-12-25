@@ -30,4 +30,9 @@ public class GenreService {
         }
         return CompletableFuture.completedFuture(genres);
     }
+
+    @Async
+    public CompletableFuture<Genre> addGenre(Genre nGenre) {
+         return CompletableFuture.completedFuture(this.genreRepos.save(nGenre));
+    }
 }
