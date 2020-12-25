@@ -55,8 +55,19 @@
                 </#if>
             </div>
         </#if>
+        <#if isRegistration >
+            <div class="g-recaptcha" data-sitekey="6LcKRhQaAAAAANbbGuCl5n7IFg-k_O-FPILSRfWo"></div>
+            <br/>
+            <#if captchaErrorCodes??>
+                <#list captchaErrorCodes as errorCode>
+                    <div class="alert alert-danger" role="alert">
+                        ${errorCode}
+                    </div>
+                </#list>
+            </#if>
+        </#if>
         <#if isRegistration>
-            <button type="submit" class="btn btn-primary">Sign Up</button>
+            <button type="submit" value="Submit" class="btn btn-primary">Sign Up</button>
         <#else>
             <button type="submit" class="btn btn-primary">Sign In</button>
         </#if>

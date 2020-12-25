@@ -12,6 +12,7 @@
         <meta name="_csrf" content="${_csrf.token}"/>
         <!-- default header name is X-CSRF-TOKEN -->
         <meta name="_csrf_header" content="${_csrf.headerName}"/>
+        <script src="https://www.google.com/recaptcha/api.js" async defer></script>
         <title>bShop</title>
     </head>
     <body>

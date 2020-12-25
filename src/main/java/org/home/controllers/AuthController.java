@@ -1,9 +1,11 @@
 package org.home.controllers;
 
+import org.home.dto.CaptchaResponseDto;
 import org.home.dto.UserValidationDto;
 import org.home.entities.Role;
 import org.home.entities.User;
 import org.home.repositories.UsersRepository;
+import org.home.services.GoogleReCaptchaService;
 import org.home.services.UsersService;
 import org.home.services.ValidationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,10 +13,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.Collections;
@@ -29,12 +28,15 @@ public class AuthController {
 
     private final UsersService usersService;
     private final ValidationService validationService;
+    private final GoogleReCaptchaService googleReCaptchaService;
 
     public AuthController(UsersService usersService,
-                          ValidationService validationService
+                          ValidationService validationService,
+                          GoogleReCaptchaService googleReCaptchaService
     ) {
         this.usersService = usersService;
         this.validationService = validationService;
+        this.googleReCaptchaService = googleReCaptchaService;
     }
 
     @GetMapping("/login")
@@ -50,8 +52,15 @@ public class AuthController {
     @PostMapping("/registration")
     public String registration(@Valid UserValidationDto userValidDto,
                                BindingResult result,
-                               Model model
+                               Model model,
+                               @RequestParam("g-recaptcha-response") String captchaResp
     ) throws ExecutionException, InterruptedException {
+        CaptchaResponseDto res = this.googleReCaptchaService.checkCaptcha(captchaResp);
+        if (!res.isSuccess()) {
+            model.addAttribute("captchaErrorCodes", res.getErrorCodes());
+
+            return "auth/registration";
+        }
 
         if (result.hasErrors()) {
             Map<String, String> errors = this.validationService.getErrors(result);
