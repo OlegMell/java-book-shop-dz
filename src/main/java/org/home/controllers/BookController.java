@@ -49,7 +49,7 @@ public class BookController {
 
         CompletableFuture.allOf(bookCompletableFuture,
                 genreCompletableFuture,
-                authorCompletableFuture).join();
+                authorCompletableFuture);
 
         List<Book> books = bookCompletableFuture.get();
         model.addAttribute("books", books);
