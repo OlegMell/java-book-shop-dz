@@ -10,6 +10,7 @@ import org.home.repositories.BooksRepository;
 import org.home.repositories.GenreRepository;
 import org.home.utils.ZipToMap;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +24,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Service
+@Cacheable("books")
 public class BooksService {
     private final BooksRepository booksRepos;
     private final AuthorService authorService;

@@ -1,5 +1,6 @@
 package org.home.controllers;
 
+import org.home.entities.User;
 import org.home.services.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -8,6 +9,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 @Controller
 @RequestMapping({"/users"})
@@ -19,8 +23,11 @@ public class UsersController {
     }
 
     @GetMapping("/")
-    public String users(Model model) {
-        model.addAttribute("users", this.usersService.getAllUsers());
+    public String users(Model model) throws ExecutionException, InterruptedException {
+        CompletableFuture<List<User>> compUsers = this.usersService.getAllUsers();
+        CompletableFuture.allOf(compUsers).join();
+        List<User> users = compUsers.get();
+        model.addAttribute("users", users);
         model.addAttribute("now", LocalDateTime.now());
 
         return "/users/index";

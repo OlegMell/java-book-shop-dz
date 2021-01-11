@@ -4,6 +4,7 @@ import org.hibernate.internal.build.AllowSysOut;
 import org.home.dto.UserUnblockDateDto;
 import org.home.dto.UserValidationDto;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -23,6 +24,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 @Service
+@Cacheable("users")
 public class UsersService implements UserDetailsService {
     private final UsersRepository usersRepos;
     private final MailSenderService mailSenderService;
@@ -101,7 +103,8 @@ public class UsersService implements UserDetailsService {
 
     @Async
     public CompletableFuture<List<User>> getAllUsers() {
-        return CompletableFuture.completedFuture((List<User>) this.usersRepos.findAll());
+        var users = this.usersRepos.findAll();
+        return CompletableFuture.completedFuture(users);
     }
 
     @Async

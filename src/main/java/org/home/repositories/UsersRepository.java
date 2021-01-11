@@ -10,6 +10,7 @@ import java.util.List;
 public interface UsersRepository extends CrudRepository<User, Long> {
     User findUserByUsername(String username);
     User findUserByActivateCode(String code);
+    List<User> findAll();
 
     @Query(value = "SELECT DISTINCT * FROM usrs WHERE unblock_date = DATE(NOW())", nativeQuery = true)
     List<User> getUsersByUnblockDate();
