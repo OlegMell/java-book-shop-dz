@@ -1,16 +1,23 @@
 package org.home.controllers;
 
 import org.home.dto.BookValidationDto;
-import org.home.entities.Author;
-import org.home.entities.Book;
-import org.home.entities.Genre;
-import org.home.entities.User;
+import org.home.entities.mongo.Author;
+import org.home.entities.mongo.Book;
+import org.home.entities.mongo.Genre;
+import org.home.entities.mongo.User;
+import org.home.helpers.ExcelHelper;
 import org.home.services.*;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -26,17 +33,21 @@ public class BookController {
     private final BooksService booksService;
     private final ValidationService validationService;
     private final AuthorService authorService;
+    private final ExcelService excelService;
+
 
     public BookController(UsersService usersService,
                           GenreService genreService,
                           BooksService booksService,
                           ValidationService validationService,
-                          AuthorService authorService) {
+                          AuthorService authorService,
+                          ExcelService excelService) {
         this.usersService = usersService;
         this.genreService = genreService;
         this.booksService = booksService;
         this.validationService = validationService;
         this.authorService = authorService;
+        this.excelService = excelService;
     }
 
 
@@ -102,7 +113,7 @@ public class BookController {
 
 
     @GetMapping("/your-books/{id}")
-    public String yourBook(@PathVariable Long id, Model model) throws
+    public String yourBook(@PathVariable String id, Model model) throws
             ExecutionException,
             InterruptedException {
         CompletableFuture<User> userCompletableFuture = this.usersService.getUserById(id);
@@ -120,7 +131,7 @@ public class BookController {
     }
 
     @GetMapping("/edit-book/{id}")
-    public String editBook(@PathVariable("id") Long id, Model model) throws ExecutionException, InterruptedException {
+    public String editBook(@PathVariable("id") String id, Model model) throws ExecutionException, InterruptedException {
         this.setBookFormModel(id, model);
 
         return "/books/edit-book";
@@ -153,15 +164,43 @@ public class BookController {
     }
 
     @GetMapping("/remove-book/{id}")
-    public String removeBook(@PathVariable("id") Long id) throws ExecutionException, InterruptedException {
+    public String removeBook(@PathVariable("id") String id) throws ExecutionException, InterruptedException {
         CompletableFuture<Object> objectCompletableFuture = this.booksService.removeBook(id);
         CompletableFuture.allOf(objectCompletableFuture).join();
         objectCompletableFuture.get();
         return "redirect:/";
     }
 
+    @PostMapping("/add-book-excel")
+    public String addBookFromExcel(@RequestParam("file") MultipartFile file) {
+        if (ExcelHelper.hasExcelFormat(file)) {
+            excelService.save(file);
+        }
 
-    private void setBookFormModel(Long bookId, Model model) throws ExecutionException, InterruptedException {
+        return "redirect:/";
+    }
+
+    @GetMapping("/download-books")
+    public ResponseEntity<Resource> downloadBooks() {
+        String filename = "books.xlsx";
+        InputStreamResource file = null;
+
+        try {
+            file = new InputStreamResource(this.excelService.load());
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename)
+                .contentType(MediaType.parseMediaType("application/vnd.ms-excel"))
+                .body(file);
+    }
+
+
+    private void setBookFormModel(String bookId, Model model) throws ExecutionException, InterruptedException {
         CompletableFuture<Book> bookCompletableFuture = this.booksService.getBookById(bookId);
         CompletableFuture<List<Author>> listCompletableFuture = this.authorService.getAllAuthors();
         CompletableFuture.allOf(listCompletableFuture, bookCompletableFuture).join();

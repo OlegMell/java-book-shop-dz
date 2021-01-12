@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 public class BookDto {
-    private Long id;
+    private String id;
     private String title;
     private GenreDto genre;
     private LocalDate date;
@@ -19,11 +19,11 @@ public class BookDto {
         this.date = date;
     }
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 

@@ -1,30 +1,23 @@
 package org.home.services;
 
 import org.home.dto.BookValidationDto;
-import org.home.entities.Author;
-import org.home.entities.Book;
-import org.home.entities.Genre;
-import org.home.entities.User;
-import org.home.repositories.AuthorsRepository;
-import org.home.repositories.BooksRepository;
-import org.home.repositories.GenreRepository;
+import org.home.entities.mongo.Author;
+import org.home.entities.mongo.Book;
+import org.home.entities.mongo.Genre;
+import org.home.entities.mongo.User;
+import org.home.repositories.mongo.BooksRepository;
 import org.home.utils.ZipToMap;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 @Service
-@Cacheable("books")
 public class BooksService {
     private final BooksRepository booksRepos;
     private final AuthorService authorService;
@@ -37,6 +30,15 @@ public class BooksService {
         this.booksRepos = bookRepos;
         this.authorService = authorService;
         this.genreService = genreService;
+    }
+
+    @Async
+    public void addBooks(List<Book> books) {
+        books.forEach(this::addBookFromExcel);
+    }
+
+    private void addBookFromExcel(Book book) {
+        this.booksRepos.save(book);
     }
 
     @Async
@@ -143,13 +145,13 @@ public class BooksService {
     }
 
     @Async
-    public CompletableFuture<Object> removeBook(Long id) {
+    public CompletableFuture<Object> removeBook(String id) {
         booksRepos.deleteById(id);
         return CompletableFuture.completedFuture(null);
     }
 
     @Async
-    public CompletableFuture<Book> getBookById(Long id) {
+    public CompletableFuture<Book> getBookById(String id) {
         return CompletableFuture.completedFuture(this.booksRepos.findById(id).orElse(null));
     }
 

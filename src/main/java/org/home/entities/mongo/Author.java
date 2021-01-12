@@ -1,24 +1,26 @@
-package org.home.entities;
+package org.home.entities.mongo;
 
-import javax.persistence.*;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 import java.util.ArrayList;
 import java.util.List;
 
-@Entity
-@Table(name = "authors")
+@Document("authors")
 public class Author {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
 
     private String firstName;
     private String lastName;
 
-    public Author() {
+    public Author(){}
 
+    public Author(String _author) {
+        this.firstName = _author;
+        this.lastName = " ";
     }
-
-
 
     public Author(String firstName, String lastName) {
         this.firstName = firstName;
@@ -28,11 +30,11 @@ public class Author {
     @ManyToMany(mappedBy = "authors")
     private List<Book> books = new ArrayList<>();
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 

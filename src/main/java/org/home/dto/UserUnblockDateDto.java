@@ -5,23 +5,23 @@ import org.springframework.format.annotation.DateTimeFormat;
 import java.time.LocalDate;
 
 public class UserUnblockDateDto {
-    private long id;
+    private String id;
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private LocalDate date;
 
     private boolean isBlocked;
 
-    public UserUnblockDateDto(long id, LocalDate date, boolean isBlocked) {
+    public UserUnblockDateDto(String id, LocalDate date, boolean isBlocked) {
         this.id = id;
         this.date = date;
         this.isBlocked = isBlocked;
     }
 
-    public long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(String id) {
         this.id = id;
     }
 

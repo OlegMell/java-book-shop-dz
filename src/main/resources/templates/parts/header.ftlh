@@ -20,8 +20,13 @@
                                 </#if>
                             </#list>
                         </#if>
-
-
+                        <li class="Eav-item">
+                            <#if auth.user??>
+                                <a class="btn btn-primary" href="/books/download-books">Download Books
+                                    <span class="sr-only">(current)</span>
+                                </a>
+                            </#if>
+                        </li>
                         <li class="nav-item">
                             <#if auth.user??>
                                 <a class="nav-link" href="/books/your-books/${auth.userId}">My

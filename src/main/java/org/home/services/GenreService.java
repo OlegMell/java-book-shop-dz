@@ -1,8 +1,7 @@
 package org.home.services;
 
-import org.home.entities.Genre;
-import org.home.repositories.GenreRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.home.entities.mongo.Genre;
+import org.home.repositories.mongo.GenresRepository;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -11,12 +10,10 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 @Service
-@Cacheable("genres")
-
 public class GenreService {
-    private final GenreRepository genreRepos;
+    private final GenresRepository genreRepos;
 
-    public GenreService(GenreRepository genreRepos) {
+    public GenreService(GenresRepository genreRepos) {
         this.genreRepos = genreRepos;
     }
 

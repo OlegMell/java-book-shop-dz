@@ -1,19 +1,18 @@
 package org.home.api.v1.controllers;
 
-import freemarker.template.utility.StringUtil;
 import org.home.dto.BookDto;
-import org.home.entities.Author;
-import org.home.entities.Book;
-import org.home.entities.Genre;
-import org.home.repositories.AuthorsRepository;
-import org.home.repositories.BooksRepository;
-import org.home.repositories.GenreRepository;
+import org.home.entities.mongo.Book;
+import org.home.entities.mongo.Genre;
+import org.home.helpers.ExcelHelper;
+import org.home.repositories.mongo.AuthorsRepository;
+import org.home.repositories.mongo.GenresRepository;
+import org.home.repositories.mongo.BooksRepository;
+import org.home.services.ExcelService;
 import org.home.utils.ObjectMapperUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,11 +21,11 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/books")
 public class BookApiController {
     private final AuthorsRepository authorsRepos;
-    private final GenreRepository genresRepos;
+    private final GenresRepository genresRepos;
     private final BooksRepository booksRepos;
 
     public BookApiController(AuthorsRepository authorsRepos,
-                             GenreRepository genresRepos,
+                             GenresRepository genresRepos,
                              BooksRepository booksRepos) {
         this.authorsRepos = authorsRepos;
         this.genresRepos = genresRepos;
@@ -43,12 +42,12 @@ public class BookApiController {
         if (!authorId.equalsIgnoreCase("all")) {
             books = books.stream().filter(book ->
                     book.getAuthors()
-                            .contains(authorsRepos.findById(Long.parseLong(authorId)).orElse(null)))
+                            .contains(authorsRepos.findById(authorId).orElse(null)))
                     .collect(Collectors.toList());
         }
 
         if (!genreId.equalsIgnoreCase("all")) {
-            Genre srchGenre = genresRepos.findById(Long.parseLong(genreId)).orElse(null);
+            Genre srchGenre = genresRepos.findById(genreId).orElse(null);
             if (srchGenre == null) {
                 return null;
             }

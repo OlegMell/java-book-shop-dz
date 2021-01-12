@@ -6,7 +6,9 @@
                 <a href="/book/${book.id}">
                     <h5 class="card-title">${book.title}</h5>
                 </a>
-                <h6 class="card-title">${book.genre.name}</h6>
+                <#if book.genre??>
+                    <h6 class="card-title">${book.genre.name}</h6>
+                </#if>
                 <div class="card-title">${book.date.toString()}</div>
                 <#if book.price??>
                     <div class="card-title">$ ${book.price}</div>

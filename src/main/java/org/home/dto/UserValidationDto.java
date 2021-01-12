@@ -3,10 +3,9 @@ package org.home.dto;
 import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotBlank;
-import java.beans.Transient;
 
 public class UserValidationDto {
-    private Long id;
+    private String id;
 
     @NotBlank(message = "Username is required field!")
     private String username;
@@ -30,11 +29,11 @@ public class UserValidationDto {
         this.confirmPassword = confirmPassword;
     }
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 

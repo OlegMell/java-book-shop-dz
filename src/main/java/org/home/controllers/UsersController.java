@@ -1,8 +1,7 @@
 package org.home.controllers;
 
-import org.home.entities.User;
+import org.home.entities.mongo.User;
 import org.home.services.UsersService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;

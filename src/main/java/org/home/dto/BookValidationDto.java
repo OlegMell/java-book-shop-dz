@@ -7,7 +7,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 public class BookValidationDto {
-    private Long id;
+    private String id;
 
     @NotBlank(message = "Title is required field!")
     private String title;
@@ -18,17 +18,17 @@ public class BookValidationDto {
     @NotBlank(message = "Price is required field!")
     private String price;
 
-    private List<Long> Authors;
+    private List<String> Authors;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private LocalDate date;
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
     public void setId(String id) {
-        this.id = Long.parseLong(id);
+        this.id = id;
     }
 
     public String getTitle() {
@@ -55,11 +55,11 @@ public class BookValidationDto {
         this.price = price;
     }
 
-    public List<Long> getAuthors() {
+    public List<String> getAuthors() {
         return Authors;
     }
 
-    public void setAuthors(List<Long> authors) {
+    public void setAuthors(List<String> authors) {
         Authors = authors;
     }
 

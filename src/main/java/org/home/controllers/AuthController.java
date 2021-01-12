@@ -2,25 +2,19 @@ package org.home.controllers;
 
 import org.home.dto.CaptchaResponseDto;
 import org.home.dto.UserValidationDto;
-import org.home.entities.Role;
-import org.home.entities.User;
-import org.home.repositories.UsersRepository;
+import org.home.entities.mongo.User;
 import org.home.services.GoogleReCaptchaService;
 import org.home.services.UsersService;
 import org.home.services.ValidationService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/auth")
@@ -88,7 +82,6 @@ public class AuthController {
     public String activate(@PathVariable("code") String code,
                            Model model
     ) throws ExecutionException, InterruptedException {
-
         CompletableFuture<Boolean> compFutureResult = this.usersService.activateUser(code);
         CompletableFuture.allOf(compFutureResult).join();
 

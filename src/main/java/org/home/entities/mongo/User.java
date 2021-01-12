@@ -1,5 +1,7 @@
-package org.home.entities;
+package org.home.entities.mongo;
 
+import org.home.entities.Role;
+import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -7,12 +9,10 @@ import javax.persistence.*;
 import java.time.LocalDate;
 import java.util.*;
 
-@Entity
-@Table(name = "usrs")
+@Document("users")
 public class User implements UserDetails {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
 
     private String username;
     private String password;
@@ -30,7 +30,7 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
     private List<Book> books = new ArrayList<>();
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
@@ -92,7 +92,7 @@ public class User implements UserDetails {
         this.roles = roles;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 

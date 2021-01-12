@@ -1,8 +1,17 @@
 <#import "../assigns.ftlh" as a>
 <#macro addBookForm authors>
-    <form action="/books/add-book" method="post">
+    <form action="/books/add-book-excel" method="post" enctype="multipart/form-data">
         <input type="hidden" name="_csrf" value="${_csrf.token}">
         <input type="hidden" name="id" value="${a.userId}">
+        <label>Add books from excel file
+            <input type="file" name="file" class="form-control">
+        </label>
+        <button type="submit" class="btn btn-primary">Upload</button>
+    </form>
+    <form action="/books/add-book" method="post" >
+        <input type="hidden" name="_csrf" value="${_csrf.token}">
+        <input type="hidden" name="id" value="${a.userId}">
+
         <div class="form-group">
             <label for="title">Title</label>
             <input type="text" name="title" class="form-control" id="title"

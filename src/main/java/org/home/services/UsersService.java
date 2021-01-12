@@ -1,18 +1,16 @@
 package org.home.services;
 
-import org.hibernate.internal.build.AllowSysOut;
 import org.home.dto.UserUnblockDateDto;
 import org.home.dto.UserValidationDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.StringUtils;
 import org.home.entities.Role;
-import org.home.entities.User;
-import org.home.repositories.UsersRepository;
+import org.home.entities.mongo.User;
+import org.home.repositories.mongo.UsersRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -24,7 +22,6 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 @Service
-@Cacheable("users")
 public class UsersService implements UserDetailsService {
     private final UsersRepository usersRepos;
     private final MailSenderService mailSenderService;
@@ -97,7 +94,7 @@ public class UsersService implements UserDetailsService {
     }
 
     @Async
-    public CompletableFuture<User> getUserById(Long id) {
+    public CompletableFuture<User> getUserById(String id) {
         return CompletableFuture.completedFuture(this.usersRepos.findById(id).orElse(null));
     }
 
