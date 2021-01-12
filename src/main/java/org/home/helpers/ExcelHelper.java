@@ -35,7 +35,7 @@ public class ExcelHelper {
             Sheet sheet = workbook.getSheet(SHEET);
             Iterator<Row> rows = sheet.iterator();
 
-            List<Book> books = new ArrayList<Book>();
+            List<Book> books = new ArrayList<>();
 
             int rowNumber = 0;
             while (rows.hasNext()) {

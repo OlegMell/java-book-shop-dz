@@ -7,6 +7,7 @@ import org.home.entities.mongo.Genre;
 import org.home.entities.mongo.User;
 import org.home.repositories.mongo.BooksRepository;
 import org.home.utils.ZipToMap;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 @Service
+@Cacheable("books")
 public class BooksService {
     private final BooksRepository booksRepos;
     private final AuthorService authorService;
@@ -33,6 +35,7 @@ public class BooksService {
     }
 
     @Async
+    @CacheEvict("books")
     public void addBooks(List<Book> books) {
         books.forEach(this::addBookFromExcel);
     }
@@ -42,6 +45,7 @@ public class BooksService {
     }
 
     @Async
+    @CacheEvict("books")
     public CompletableFuture<Book> addNewBook(BookValidationDto bookValidDto,
                                               List<String> firstnames,
                                               List<String> lastnames,
@@ -55,6 +59,7 @@ public class BooksService {
     }
 
     @Async
+    @CacheEvict("books")
     public CompletableFuture<Book> editBook(BookValidationDto bookValidDto,
                                             List<String> firstnames,
                                             List<String> lastnames,
@@ -145,6 +150,7 @@ public class BooksService {
     }
 
     @Async
+    @CacheEvict("books")
     public CompletableFuture<Object> removeBook(String id) {
         booksRepos.deleteById(id);
         return CompletableFuture.completedFuture(null);

@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 @Service
+@Cacheable("authors")
 public class AuthorService {
     private final AuthorsRepository authorsRepos;
 

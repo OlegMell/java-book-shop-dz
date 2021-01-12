@@ -3,6 +3,7 @@ package org.home.services;
 import org.home.dto.UserUnblockDateDto;
 import org.home.dto.UserValidationDto;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Async;
@@ -22,6 +23,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 @Service
+@Cacheable("users")
 public class UsersService implements UserDetailsService {
     private final UsersRepository usersRepos;
     private final MailSenderService mailSenderService;
@@ -55,6 +57,7 @@ public class UsersService implements UserDetailsService {
     }
 
     @Async
+    @CacheEvict("users")
     public CompletableFuture<Object> addNewUser(UserValidationDto userValidDto) {
         User user = new User();
 
@@ -82,6 +85,7 @@ public class UsersService implements UserDetailsService {
     }
 
     @Async
+    @CacheEvict("users")
     public CompletableFuture<Boolean> activateUser(String code) {
         User user = usersRepos.findUserByActivateCode(code);
 
@@ -105,6 +109,7 @@ public class UsersService implements UserDetailsService {
     }
 
     @Async
+    @CacheEvict("users")
     public CompletableFuture<Boolean> setUnblockDate(UserUnblockDateDto userUnblockDateDto) {
         User user = this.usersRepos.findById(userUnblockDateDto.getId()).orElse(null);
 
@@ -118,6 +123,7 @@ public class UsersService implements UserDetailsService {
     }
 
     @Async
+    @CacheEvict("users")
     public CompletableFuture<Object> unblockUsers() {
         List<User> users = this.usersRepos.getUsersByUnblockDate();
         users.forEach(user -> {
