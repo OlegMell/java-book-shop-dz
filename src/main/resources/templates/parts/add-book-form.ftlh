@@ -8,10 +8,13 @@
         </label>
         <button type="submit" class="btn btn-primary">Upload</button>
     </form>
-    <form action="/books/add-book" method="post" >
+    <form action="/books/add-book" method="post">
         <input type="hidden" name="_csrf" value="${_csrf.token}">
         <input type="hidden" name="id" value="${a.userId}">
-
+        <div class="form-group">
+            <label for="image">Image</label>
+            <input type="file" name="image" class="form-control" id="image">
+        </div>
         <div class="form-group">
             <label for="title">Title</label>
             <input type="text" name="title" class="form-control" id="title"
