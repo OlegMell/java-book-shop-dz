@@ -8,7 +8,8 @@
         </label>
         <button type="submit" class="btn btn-primary">Upload</button>
     </form>
-    <form action="/books/add-book" method="post">
+    <hr>
+    <form action="/books/add-book" method="post" enctype="multipart/form-data">
         <input type="hidden" name="_csrf" value="${_csrf.token}">
         <input type="hidden" name="id" value="${a.userId}">
         <div class="form-group">

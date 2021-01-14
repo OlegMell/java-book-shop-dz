@@ -17,9 +17,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 @Service
-@Cacheable("books")
 public class BooksService {
     private final BooksRepository booksRepos;
     private final AuthorService authorService;
@@ -35,7 +37,7 @@ public class BooksService {
     }
 
     @Async
-    @CacheEvict("books")
+//    @CacheEvict("books")
     public void addBooks(List<Book> books) {
         books.forEach(this::addBookFromExcel);
     }
@@ -45,7 +47,7 @@ public class BooksService {
     }
 
     @Async
-    @CacheEvict("books")
+//    @CacheEvict("books")
     public CompletableFuture<Book> addNewBook(BookValidationDto bookValidDto,
                                               List<String> firstnames,
                                               List<String> lastnames,
@@ -59,7 +61,7 @@ public class BooksService {
     }
 
     @Async
-    @CacheEvict("books")
+//    @CacheEvict("books")
     public CompletableFuture<Book> editBook(BookValidationDto bookValidDto,
                                             List<String> firstnames,
                                             List<String> lastnames,
@@ -145,12 +147,13 @@ public class BooksService {
         _book.setGenre(genre);
         _book.getAuthors().addAll(authors);
         _book.setUser(user);
+        _book.setImage(bookValidDto.getImageLink());
 
         return booksRepos.save(_book);
     }
 
     @Async
-    @CacheEvict("books")
+//    @CacheEvict("books")
     public CompletableFuture<Object> removeBook(String id) {
         booksRepos.deleteById(id);
         return CompletableFuture.completedFuture(null);
@@ -162,13 +165,19 @@ public class BooksService {
     }
 
     @Async
-    public CompletableFuture<List<Book>> getAllBooks() {
-        var books = this.booksRepos.findAll();
-
+    public CompletableFuture<List<Book>> getAllBooks(int page, int size) {
+        Pageable paging = PageRequest.of(page, size);
+        var booksPage = this.booksRepos.findAll(paging);
+        var books = booksPage.getContent();
         if (books.size() == 0) {
             books = null;
         }
 
         return CompletableFuture.completedFuture(books);
+    }
+
+    @Async
+    public CompletableFuture<Long> getBookCount() {
+        return CompletableFuture.completedFuture(this.booksRepos.count());
     }
 }

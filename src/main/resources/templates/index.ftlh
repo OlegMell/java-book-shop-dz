@@ -32,7 +32,18 @@
                         </div>
                     </div>
                 <#else >
-                    <@b.booksView books/>
+                    <div style="display: flex; flex-direction: column; width: 100%;">
+                        <div style="display:flex; justify-content: space-between; padding: 15px">
+                            <@b.booksView books/>
+                        </div>
+                        <div class="pagination">
+                            <#list 0..pages as p>
+                                <button class="btn btn-primary pagination-btn">
+                                    <a href="/?page=${p}" class="pagination-btn-link">${p + 1}</a>
+                                </button>
+                            </#list>
+                        </div>
+                    </div>
                 </#if>
             </div>
         </div>

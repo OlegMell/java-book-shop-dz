@@ -23,7 +23,7 @@ public class Book {
 
     private LocalDate date;
     private Float price;
-
+    private String image;
 
     public Book() {
     }
@@ -98,5 +98,13 @@ public class Book {
 
     public void setPrice(Float price) {
         this.price = price;
+    }
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
     }
 }

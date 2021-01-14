@@ -9,7 +9,6 @@ body {
     align-items: center;
 }
 
-
 .auth-form-wrapper {
     display: flex;
     flex-direction: column;
@@ -126,6 +125,23 @@ body {
 .validation-error {
     color: red;
     font-size: 17px;
+}
+
+.pagination {
+    width: 80%;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.pagination-btn {
+    margin: 5px;
+}
+
+.pagination-btn-link {
+    list-style: none;
+    color: #fff;
 }
 
 @-webkit-keyframes slide-top {

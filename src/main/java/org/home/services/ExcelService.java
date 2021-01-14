@@ -28,15 +28,8 @@ public class ExcelService {
         }
     }
 
-    public List<Book> getAllBooks() throws ExecutionException, InterruptedException {
-        CompletableFuture<List<Book>> completableFutureBooks = booksService.getAllBooks();
-        CompletableFuture.allOf(completableFutureBooks).join();
-        List<Book> books = completableFutureBooks.get();
-        return books;
-    }
-
     public ByteArrayInputStream load() throws ExecutionException, InterruptedException {
-        CompletableFuture<List<Book>> completableFutureBooks = this.booksService.getAllBooks();
+        CompletableFuture<List<Book>> completableFutureBooks = this.booksService.getAllBooks(0, 100);
         CompletableFuture.allOf(completableFutureBooks).join();
         List<Book> books = completableFutureBooks.get();
         return ExcelHelper.booksToExcel(books);

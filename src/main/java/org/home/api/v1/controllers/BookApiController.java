@@ -9,6 +9,8 @@ import org.home.repositories.mongo.GenresRepository;
 import org.home.repositories.mongo.BooksRepository;
 import org.home.services.ExcelService;
 import org.home.utils.ObjectMapperUtils;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -36,8 +38,10 @@ public class BookApiController {
     public List<BookDto> filterBook(@RequestParam(required = false) String authorId,
                                     @RequestParam(required = false) String genreId,
                                     @RequestParam(required = false) String price) {
+        Pageable paging = PageRequest.of(0, 2);
 
-        List<Book> books = booksRepos.findAll();
+        var bookPage = booksRepos.findAll(paging);
+        var books= bookPage.getContent();
 
         if (!authorId.equalsIgnoreCase("all")) {
             books = books.stream().filter(book ->

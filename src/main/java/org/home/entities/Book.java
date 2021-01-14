@@ -20,7 +20,7 @@ public class Book {
 
     private LocalDate date;
     private Float price;
-
+    private String image;
 
     public Book() {
     }

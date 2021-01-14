@@ -1,6 +1,7 @@
 package org.home.dto;
 
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.constraints.NotBlank;
 import java.time.LocalDate;
@@ -19,6 +20,10 @@ public class BookValidationDto {
     private String price;
 
     private List<String> Authors;
+
+    private MultipartFile image;
+
+    private String imageLink;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private LocalDate date;
@@ -69,5 +74,21 @@ public class BookValidationDto {
 
     public void setDate(LocalDate date) {
         this.date = date;
+    }
+
+    public MultipartFile getImage() {
+        return image;
+    }
+
+    public void setImage(MultipartFile image) {
+        this.image = image;
+    }
+
+    public String getImageLink() {
+        return imageLink;
+    }
+
+    public void setImageLink(String imageLink) {
+        this.imageLink = imageLink;
     }
 }

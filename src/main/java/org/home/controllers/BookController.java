@@ -1,5 +1,6 @@
 package org.home.controllers;
 
+import com.dropbox.core.DbxException;
 import org.home.dto.BookValidationDto;
 import org.home.entities.mongo.Author;
 import org.home.entities.mongo.Book;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -34,6 +36,7 @@ public class BookController {
     private final ValidationService validationService;
     private final AuthorService authorService;
     private final ExcelService excelService;
+    private final DropBoxService dropBoxService;
 
 
     public BookController(UsersService usersService,
@@ -41,31 +44,41 @@ public class BookController {
                           BooksService booksService,
                           ValidationService validationService,
                           AuthorService authorService,
-                          ExcelService excelService) {
+                          ExcelService excelService,
+                          DropBoxService dropBoxService) {
         this.usersService = usersService;
         this.genreService = genreService;
         this.booksService = booksService;
         this.validationService = validationService;
         this.authorService = authorService;
         this.excelService = excelService;
+        this.dropBoxService = dropBoxService;
     }
 
 
     @GetMapping("/")
-    public String getBooks(@AuthenticationPrincipal User user, Model model) throws ExecutionException, InterruptedException {
-        CompletableFuture<List<Book>> bookCompletableFuture = this.booksService.getAllBooks();
+    public String getBooks(@AuthenticationPrincipal User user,
+                           @RequestParam(defaultValue = "0") int page,
+                           @RequestParam(defaultValue = "3") int size,
+                           Model model) throws ExecutionException, InterruptedException, DbxException {
+        CompletableFuture<List<Book>> bookCompletableFuture = this.booksService.getAllBooks(page, size);
         CompletableFuture<List<Genre>> genreCompletableFuture = this.genreService.getAllGenres();
         CompletableFuture<List<Author>> authorCompletableFuture = this.authorService.getAllAuthors();
+        CompletableFuture<Long> countCompletableFuture = this.booksService.getBookCount();
 
 
         CompletableFuture.allOf(bookCompletableFuture,
                 genreCompletableFuture,
-                authorCompletableFuture).join();
+                authorCompletableFuture,
+                countCompletableFuture).join();
 
         List<Book> books = bookCompletableFuture.get();
         model.addAttribute("books", books);
         model.addAttribute("genres", genreCompletableFuture.get());
         model.addAttribute("authors", authorCompletableFuture.get());
+        Long booksCount = countCompletableFuture.get();
+        double pages = Math.ceil(booksCount / size);
+        model.addAttribute("pages", pages);
 
         if (user != null) {
             model.addAttribute("isActive", user.getActivateCode() == null);
@@ -105,7 +118,18 @@ public class BookController {
             return "books/add-book";
         }
 
-        CompletableFuture<Book> objectCompletableFuture = this.booksService.addNewBook(bookValidDto, firstnames, lastnames, user);
+        try {
+            String imageLink = this.dropBoxService.uploadFile(bookValidDto.getImage().getInputStream(), bookValidDto.getImage().getOriginalFilename());
+            bookValidDto.setImageLink(imageLink);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+        CompletableFuture<Book> objectCompletableFuture = this.booksService.addNewBook(bookValidDto,
+                firstnames,
+                lastnames,
+                user);
         CompletableFuture.allOf(objectCompletableFuture).join();
         objectCompletableFuture.get();
         return "redirect:/";

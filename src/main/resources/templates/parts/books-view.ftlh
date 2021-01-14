@@ -1,7 +1,11 @@
 <#macro booksView books removable = false editable = false>
     <#list books as book>
         <div class="card book" style="width: 18rem;">
-            <img src="https://pngimg.com/uploads/book/book_PNG2105.png" class="card-img-top" alt="book image">
+            <#if book.image??>
+                <img src="${book.image}" class="card-img-top" alt="book image">
+            <#else>
+                <img src="https://pngimg.com/uploads/book/book_PNG2105.png" class="card-img-top" alt="book image">
+            </#if>
             <div class="card-body">
                 <a href="/book/${book.id}">
                     <h5 class="card-title">${book.title}</h5>
